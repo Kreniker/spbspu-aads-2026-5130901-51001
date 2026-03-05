@@ -1,5 +1,3 @@
-#include <utility>
-#include <limits>
 #include <iostream>
 #include <string>
 
@@ -31,7 +29,7 @@ namespace kitserov
     }
     bool operator==(const LIter& other) const
     {
-      return node_ == other.node;
+      return node_ == other.node_;
     }
     bool operator!=(const LIter& other) const
     {
@@ -205,7 +203,6 @@ int main()
     }
     if (std::cin.fail()) {
       std::cin.clear();
-      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
       list_of_lists.insert_tail(std::move(numbers));
     }
   }
@@ -230,10 +227,12 @@ int main()
     }
     std::cout << "\n";
   }
+
   names.clear();
   for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
     (*it).clear();
   }
   list_of_lists.clear();
+
   return 0;
 }
