@@ -206,6 +206,10 @@ int main()
       list_of_lists.insert_tail(numbers);
     }
   }
+  if (names.get_size() == 0) {
+    std::cout << "0\n";
+    return 0;
+  }
   std::cout << "\n";
   for (LIter< std::string > it = names.begin(); it != names.end(); ++it) {
     std::cout << *it << " ";
