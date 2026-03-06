@@ -179,6 +179,14 @@ namespace kitserov
     Node* head;
     size_t size;
   };
+  template < class T >
+  void print_list(List< T >& list)
+  {
+    for (LIter< T > it = list.begin(); it != list.end(); ++it) {
+      std::cout << *it << " ";
+    }
+    std::cout << "\n";
+  }
 }
 
 int main()
@@ -211,10 +219,7 @@ int main()
     return 0;
   }
   std::cout << "\n";
-  for (LIter< std::string > it = names.begin(); it != names.end(); ++it) {
-    std::cout << *it << " ";
-  }
-  std::cout << "\n";
+  print_list(names);
   size_t max_size = 0;
   for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
     size_t s = it->get_size();
@@ -222,16 +227,20 @@ int main()
       max_size = s;
     }
   }
+  List< int > summes;
   for (size_t i = 0; i < max_size; i++) {
+    int sum = 0;
     for (size_t j = 0; j < list_of_lists.get_size(); j++) {
       List< int >& curList = *(list_of_lists[j]);
       if (curList.get_size() > i) {
         std::cout << *(curList[i]) << " ";
+        sum += *(curList[i]);
       }
     }
+    summes.insert_tail(sum);
     std::cout << "\n";
   }
-
+  print_list(summes);
   names.clear();
   for (LIter< List< int > > it = list_of_lists.begin(); it != list_of_lists.end(); ++it) {
     (*it).clear();
