@@ -249,6 +249,37 @@ namespace kitserov
     size_t get_size() {
       return size;
     }
+    LIter< T > pop_front()
+    {
+      if (!head) {
+        throw std::out_of_range("List is empty");
+      }
+      Node* old_head = head;
+      head = head->next;
+      delete old_head;
+      --size;
+      return LIter< T >(head);
+    }
+    LIter< T > pop_back() {
+      if (!head) {
+        throw std::out_of_range("List is empty");
+      }
+      Node* current;
+      if (head->next == nullptr) {
+        delete head;
+        head = nullptr;
+        current = head;
+      } else {
+        current = head;
+        while (current->next->next != nullptr) {
+          current = current->next;
+        }
+        delete current->next;
+        current->next = nullptr;
+      }
+      --size;
+      return LIter< T >(current);
+    }
   private:
     Node* head;
     size_t size;
@@ -269,6 +300,7 @@ namespace kitserov
     }
     list_of_lists.clear();
   }
+
 }
 
 int main()
@@ -299,7 +331,10 @@ int main()
         int next_char = std::cin.peek();
         if (next_char != EOF && std::isdigit(static_cast< unsigned char >(next_char)))
         {
-          std::cerr << "Integer overflow\n";
+          std::cerr << "Overflow\n";
+          numbers.clear();
+          names.clear();
+          clear_list_of_lists(list_of_lists);
           return 1;
         }
         list_of_lists.insert_tail(numbers);
@@ -334,7 +369,10 @@ int main()
         int val = *(curList[i]);
         std::cout << val << " ";
         if (sum > std::numeric_limits< int >::max() - val) {
-          std::cerr << "Overflow\n";
+          std::cerr << "Overflow sum\n";
+          summes.clear();
+          names.clear();
+          clear_list_of_lists(list_of_lists);
           return 1;
         }
         sum += val;
