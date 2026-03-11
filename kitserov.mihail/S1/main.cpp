@@ -41,7 +41,34 @@ namespace kitserov
   class LCIter
   {
     friend class List< T >;
-    
+    typename List< T >::Node* node_;
+  public:
+    LCIter() : node_(nullptr) {}
+    LCIter(typename List<T>::Node* n) : node_(n) {}
+    LCIter(const LIter<T>& it) : node_(it.node_) {}
+    const T& operator*() const
+    {
+      return node_->data;
+    }
+    const T* operator->() const
+    {
+      return &node_->data;
+    }
+    LCIter& operator++()
+    {
+      if (node_) {
+        node_ = node_->next;
+      }
+      return *this;
+    }
+    bool operator==(const LCIter& other) const
+    {
+      return node_ == other.node_;
+    }
+    bool operator!=(const LCIter& other) const
+    {
+      return node_ != other.node_;
+    }
   };
 
   template< class T >
@@ -53,8 +80,8 @@ namespace kitserov
       Node* next;
       Node(T& v, Node* n = nullptr) : data(std::move(v)), next(n) {}
     };
-    List() : head(nullptr), size(0) {}
-    ~List()
+    List() noexcept : head(nullptr), size(0) {}
+    ~List() noexcept
     {
       clear();
     }
@@ -76,14 +103,32 @@ namespace kitserov
       }
       return *this;
     }
-    LIter< T > begin() 
+
+    LIter< T > begin() noexcept
     {
       return LIter< T >(head);
     }
-    LIter< T > end()
+    LIter< T > end() noexcept
     {
       return LIter< T >(nullptr);
     }
+    LCIter< T > begin() const noexcept
+    {
+      return LCIter< T >(head);
+    }
+    LCIter< T > end() const
+    {
+      return LCIter< T >(nullptr);
+    }
+    LCIter< T > cbegin() const
+    {
+      return LCIter< T >(head);
+    }
+    LCIter< T > cend() const
+    {
+      return LCIter< T >(nullptr);
+    }
+
     LIter< T > operator[](size_t index)
     {
       if (index >= size) {
@@ -95,6 +140,18 @@ namespace kitserov
       }
       return LIter< T >(current);
     }
+    LCIter< T > operator[](size_t index) const
+    {
+      if (index >= size) {
+        throw std::out_of_range("out_of_range");
+      }
+      Node* current = head;
+      for (size_t i = 0; i < index; i++) {
+        current = current->next;
+      }
+      return LCIter< T >(current);
+    }
+
     Node* add(T& v)
     {
       Node* newNode = new Node(v, head);
@@ -119,7 +176,15 @@ namespace kitserov
       }
       return insert(v, (*this)[size - 1]);
     }
+
     T& front()
+    {
+      if (!size) {
+        throw std::out_of_range("list is empty");
+      }
+      return head->data;
+    }
+    const T& front() const
     {
       if (!size) {
         throw std::out_of_range("list is empty");
@@ -133,6 +198,14 @@ namespace kitserov
       }
       return *((*this)[size - 1]);
     }
+    const T& back() const
+    {
+      if (!size) {
+        throw std::out_of_range("list is empty");
+      }
+      return *((*this)[size - 1]);
+    }
+
     void clear(LIter< T > from, LIter< T > to)
     {
       if (from.node_ == nullptr) {
