@@ -276,7 +276,6 @@ int main()
   using namespace kitserov;
   List< std::string > names;
   List< List< int > > list_of_lists;
-  List< int > numbers;
   std::string name;
   while (true) {
     try {
@@ -284,20 +283,29 @@ int main()
         break;
       }
       names.insert_tail(name);
+      List< int > numbers;
       int num;
       while (std::cin >> num) {
         numbers.insert_tail(num);
       }
       if (std::cin.eof()) {
         list_of_lists.insert_tail(numbers);
+        numbers.clear();
         break;
       }
       if (std::cin.fail()) {
         std::cin.clear();
+        std::cin >> std::ws;
+        int next_char = std::cin.peek();
+        if (next_char != EOF && std::isdigit(static_cast< unsigned char >(next_char)))
+        {
+          std::cerr << "Integer overflow\n";
+          return 1;
+        }
         list_of_lists.insert_tail(numbers);
       }
-    } catch(...) {
       numbers.clear();
+    } catch(...) {
       names.clear();
       clear_list_of_lists(list_of_lists);
       std::cerr << "bad allocated memory\n";
