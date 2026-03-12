@@ -345,6 +345,9 @@ namespace kitserov
     Node* head_;
     size_t size_;
   };
+
+  template class List< int >;
+  template class List< List< int > >;
 }
 
 #endif

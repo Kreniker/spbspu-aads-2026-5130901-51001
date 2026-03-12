@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE S1
+#define BOOST_TEST_NO_LIB
 #include <stdexcept>
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
 #include "list.hpp"
 #include "utils.hpp"
 
@@ -16,7 +17,7 @@ BOOST_AUTO_TEST_CASE(add_element_front)
 {
   kitserov::List< int > lst;
   int val = 42;
-  auto it = lst.add(val);
+  kitserov::LIter< int > it = lst.add(val);
   BOOST_TEST(lst.get_size() == 1);
   BOOST_TEST(*lst.begin() == 42);
   BOOST_TEST(lst.front() == 42);
@@ -43,11 +44,11 @@ BOOST_AUTO_TEST_CASE(insert_at_position)
   int val2 = 20;
   int val3 = 30;
   lst.add(val1);
-  auto pos = lst.begin();
+  kitserov::LIter< int > pos = lst.begin();
   lst.insert(val2, pos);
-  lst.insert(val3, lst.end());
+  lst.insert(val3, ++pos);
   BOOST_TEST(lst.get_size() == 3);
-  auto it = lst.begin();
+  kitserov::LIter< int > it = lst.begin();
   BOOST_TEST(*it == 10);
   ++it;
   BOOST_TEST(*it == 20);
@@ -157,7 +158,7 @@ BOOST_AUTO_TEST_CASE(iterator_modification)
   for (auto it = lst.begin(); it != lst.end(); ++it) {
     *it += 10;
   }
-  auto it = lst.begin();
+  kitserov::LIter< int > it = lst.begin();
   BOOST_TEST(*it == 11);
   ++it;
   BOOST_TEST(*it == 12);
@@ -171,7 +172,7 @@ BOOST_AUTO_TEST_CASE(const_iterators)
   int val = 42;
   lst.add(val);
   const kitserov::List< int >& clst = lst;
-  auto cit = clst.cbegin();
+  kitserov::LCIter< int > cit = clst.cbegin();
   BOOST_TEST(*cit == 42);
   auto cit2 = clst.begin();
   BOOST_TEST(*cit2 == 42);
@@ -184,12 +185,12 @@ BOOST_AUTO_TEST_CASE(iterator_comparison)
   int val2 = 2;
   lst.add(val1);
   lst.insert_tail(val2);
-  auto it1 = lst.begin();
-  auto it2 = lst.begin();
+  kitserov::LIter< int > it1 = lst.begin();
+  kitserov::LIter< int > it2 = lst.begin();
   BOOST_CHECK(it1 == it2);
   ++it2;
   BOOST_CHECK(it1 != it2);
-  auto it3 = lst.end();
+  kitserov::LIter< int > it3 = lst.end();
   BOOST_CHECK(it3 != it1);
 }
 
@@ -200,12 +201,12 @@ BOOST_AUTO_TEST_CASE(clear_range)
   for (int& v : vals) {
     lst.insert_tail(v);
   }
-  auto from = lst.begin();
+  kitserov::LIter< int > from = lst.begin();
   ++from;
-  auto last = lst[4];
+  kitserov::LIter< int > last = lst[4];
   lst.clear(from, last);
   BOOST_TEST(lst.get_size() == 2);
-  auto it = lst.begin();
+  kitserov::LIter< int > it = lst.begin();
   BOOST_TEST(*it == 1);
   ++it;
   BOOST_TEST(*it == 5);
