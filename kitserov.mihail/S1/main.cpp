@@ -8,7 +8,7 @@ int main()
 {
   using namespace kitserov;
   List< std::string > names;
-  List< List< int > > listOfLists;
+  List< List< size_t > > listOfLists;
   std::string name;
   bool hasNumbers = false;
   while (true) {
@@ -17,7 +17,7 @@ int main()
         break;
       }
       names.insert_tail(name);
-      List< int > numbers;
+      List< size_t > numbers;
       size_t value;
       while (true) {
         if(!(std::cin >> value)) {
@@ -34,15 +34,7 @@ int main()
           }
           break;
         }
-        if (value > std::numeric_limits< int >::max()) {
-          std::cerr << "Overflow\n";
-          numbers.clear();
-          names.clear();
-          clearListOfLists(listOfLists);
-          return 1;
-        }
-        int intValue = static_cast< int >(value);
-        numbers.insert_tail(intValue);
+        numbers.insert_tail(value);
         hasNumbers = true;
       }
       listOfLists.insert_tail(numbers);
@@ -62,25 +54,25 @@ int main()
   }
   printList(names);
   size_t maxSize = 0;
-  for (LIter< List< int > > it = listOfLists.begin(); it != listOfLists.end(); ++it) {
+  for (LIter< List< size_t > > it = listOfLists.begin(); it != listOfLists.end(); ++it) {
     size_t s = it->get_size();
     if (s > maxSize) {
       maxSize = s;
     }
   }
-  List< int > summes;
+  List< size_t > summes;
   for (size_t i = 0; i < maxSize; i++) {
-    int sum = 0;
+    size_t sum = 0;
     size_t s = listOfLists.get_size();
     for (size_t j = 0; j < s; j++) {
-      List< int >& curList = *(listOfLists[j]);
+      List< size_t >& curList = *(listOfLists[j]);
       if (curList.get_size() > i) {
-        int val = *(curList[i]);
+        size_t val = *(curList[i]);
         std::cout << val;
-        if (j + 1 != s) {
+        if (j + 1 != curList.get_size()) {
           std::cout << " ";
         }
-        if (sum > std::numeric_limits< int >::max() - val) {
+        if (sum > std::numeric_limits< size_t >::max() - val) {
           std::cerr << "Overflow sum\n";
           summes.clear();
           names.clear();
