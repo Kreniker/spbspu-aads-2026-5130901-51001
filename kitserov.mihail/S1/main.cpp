@@ -53,11 +53,13 @@ int main()
       return 2;
     }
   }
+  //std::cout << "\n";
   if (names.get_size() == 0 || !hasNumbers) {
-    std::cout << "\n0\n";
+    printList(names);
+    std::cout << "0\n";
+    names.clear();
     return 0;
   }
-  std::cout << "\n";
   printList(names);
   size_t maxSize = 0;
   for (LIter< List< int > > it = listOfLists.begin(); it != listOfLists.end(); ++it) {
