@@ -9,8 +9,12 @@ namespace kitserov
   template< class T >
   void printList(List< T >& list)
   {
-    for (LIter< T > it = list.begin(); it != list.end(); ++it) {
-      std::cout << *it << " ";
+    size_t s = list.get_size();
+    for (size_t i = 0; i < s; ++i) {
+      std::cout << *(list[i]);
+      if (i + 1 != s) {
+        std::cout << " ";
+      }
     }
     std::cout << "\n";
   }
