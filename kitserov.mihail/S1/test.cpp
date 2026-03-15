@@ -1,6 +1,4 @@
 #define BOOST_TEST_MODULE S1
-#define BOOST_TEST_NO_MAIN
-#define BOOST_TEST_ALTERNATIVE_INIT_API
 #include <boost/test/included/unit_test.hpp>
 #include <stdexcept>
 #include "list.hpp"
@@ -212,3 +210,4 @@ BOOST_AUTO_TEST_CASE(clear_range)
   ++it;
   BOOST_TEST(*it == 5);
 }
+BOOST_AUTO_TEST_SUITE_END()
