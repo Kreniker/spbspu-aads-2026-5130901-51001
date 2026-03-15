@@ -375,8 +375,8 @@ namespace kitserov
     size_t size_;
   };
 
-  template class List< int >;
-  template class List< List< int > >;
+  template class List< size_t >;
+  template class List< List< size_t > >;
 }
 
 #endif
