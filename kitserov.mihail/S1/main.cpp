@@ -11,6 +11,7 @@ int main()
   List< List< size_t > > listOfLists;
   std::string name;
   bool hasNumbers = false;
+
   while (true) {
     try {
       if (!(std::cin >> name)) {
@@ -19,9 +20,12 @@ int main()
       names.insert_tail(name);
       List< size_t > numbers;
       size_t value;
+
       while (true) {
-        if(!(std::cin >> value)) {
-          if (std::cin.eof()) break;
+        if (!(std::cin >> value)) {
+          if (std::cin.eof()) {
+            break;
+          }
           std::cin.clear();
           std::cin >> std::ws;
           int nextChar = std::cin.peek();
@@ -45,6 +49,7 @@ int main()
       return 2;
     }
   }
+
   if (names.get_size() == 0 || !hasNumbers) {
     if (names.get_size() != 0) {
       printList(names);
@@ -52,8 +57,10 @@ int main()
     std::cout << "0\n";
     names.clear();
     return 0;
-  } 
+  }
+
   printList(names);
+
   size_t maxSize = 0;
   for (LIter< List< size_t > > it = listOfLists.begin(); it != listOfLists.end(); ++it) {
     size_t s = it->get_size();
@@ -61,6 +68,7 @@ int main()
       maxSize = s;
     }
   }
+
   List< size_t > summes;
   for (size_t i = 0; i < maxSize; i++) {
     size_t sum = 0;
@@ -79,7 +87,7 @@ int main()
           summes.clear();
           names.clear();
           clearListOfLists(listOfLists);
-          exit(1);
+          return 1;
         }
         sum += val;
       }
@@ -87,6 +95,7 @@ int main()
     summes.insert_tail(sum);
     std::cout << "\n";
   }
+
   printList(summes);
   summes.clear();
   names.clear();
