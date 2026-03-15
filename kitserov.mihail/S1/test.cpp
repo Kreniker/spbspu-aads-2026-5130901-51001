@@ -1,8 +1,9 @@
 #define BOOST_TEST_MODULE S1
 #include <boost/test/included/unit_test.hpp>
-#include <stdexcept>
 #include "list.hpp"
 #include "utils.hpp"
+
+BOOST_AUTO_TEST_SUITE(S1)
 
 BOOST_AUTO_TEST_CASE(default_constructed_list_is_empty)
 {
