@@ -2,9 +2,11 @@
 #define STACK_HPP
 
 template < class T >
-struct Stack {
-  void push(T rhs);
-  T drop();
+class Stack {
+  List< T > data_;
+public:
+  void push(const T& rhs);
+  const T& drop();
 };
 
 #endif
