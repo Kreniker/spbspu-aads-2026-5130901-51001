@@ -10,10 +10,10 @@ namespace kitserov
         {
           data_.add(rhs);
         }
-        T drop()
+        T& drop()
         {
             try {
-                T value data_.back();
+                T& value = data_.back();
                 data_.pop_back();
                 return value;
             } catch (const std::out_of_range& e) {
