@@ -13,16 +13,14 @@ namespace kitserov
     isEof = false;
     Queue< T > queue;
     T token;
-    bool isSkipws = in.flags() & std::ios_base::skipws;
-    if (!isSkipws) {
-      in >> std::skipws;
-    }
     while (true) {
       const int nextChar = in.peek();
-      if (nextChar == EOF || nextChar == '\n') {
-        if (nextChar == EOF) {
+      if (nextChar == EOF) {
           isEof = true;
-        }
+        break;
+      }
+      if (nextChar == '\n') {
+        in.get();
         break;
       }
 
@@ -31,9 +29,6 @@ namespace kitserov
       }
 
       queue.push(token);
-    }
-    if (!isSkipws) {
-        in >> std::noskipws;
     }
     return queue;
   }

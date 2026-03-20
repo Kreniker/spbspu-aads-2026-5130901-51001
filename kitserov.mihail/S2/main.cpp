@@ -2,6 +2,7 @@
 #include <iostream>
 #include "queue.hpp"
 #include "stack.hpp"
+#include "utils.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -11,15 +12,22 @@ int main(int argc, char* argv[])
         return 1;
     }
     bool haveFilename = argc == 2;
+
+    std::ifstream file;
+    std::istream& inputStream = std::cin;
     if (haveFilename) {
-        std::ifstream file(argv[1]);
+        file.open(argv[1]);
         if (!file.is_open()) {
             std::cerr << "Failed to open file: " << argv[1] << "\n";
             return 1;
         }
-        
-    } else {
+        inputStream = file;
+    }
 
+    bool isEof = false;
+    while (!isEof) {
+        Queue< std::string > tokens = readLine< std::string >(inputStream, isEof);
+        (void)tokens;
     }
     return 0;
 }

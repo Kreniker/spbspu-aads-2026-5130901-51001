@@ -3,6 +3,7 @@
 #include "common/list.hpp"
 namespace kitserov 
 {
+    template< class T >
     class Queue {
         List< T > data_;
       public:
