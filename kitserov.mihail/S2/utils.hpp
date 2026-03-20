@@ -7,10 +7,12 @@
 
 namespace kitserov
 {
-  Queue< std::string > readLine(std::istream& in)
+  template< class T >
+  Queue< T > readLine(std::istream& in, bool& isEof)
   {
-    Queue< std::string > queue;
-    std::string token;
+    isEof = false;
+    Queue< T > queue;
+    T token;
     bool isSkipws = in.flags() & std::ios_base::skipws;
     if (!isSkipws) {
       in >> std::skipws;
@@ -18,6 +20,9 @@ namespace kitserov
     while (true) {
       const int nextChar = in.peek();
       if (nextChar == EOF || nextChar == '\n') {
+        if (nextChar == EOF) {
+          isEof = true;
+        }
         break;
       }
 

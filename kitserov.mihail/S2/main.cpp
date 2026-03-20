@@ -17,5 +17,9 @@ int main(int argc, char* argv[])
             std::cerr << "Failed to open file: " << argv[1] << "\n";
             return 1;
         }
+        
+    } else {
+
     }
+    return 0;
 }
