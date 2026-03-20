@@ -21,6 +21,14 @@ namespace kitserov {
         throw std::out_of_range("Stack is empty");
       }
     }
+    void clear()
+    {
+      data_.clear();
+    }
+    ~Stack()
+    {
+      clear();
+    }
   };
 }
 

@@ -20,6 +20,14 @@ namespace kitserov
                 throw std::out_of_range("Queue is empty");
             }
         }
+        void clear()
+        {
+          data_.clear();
+        }
+        ~Queue()
+        {
+          clear();
+        }
       };
 }
 
