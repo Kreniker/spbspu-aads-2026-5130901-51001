@@ -30,13 +30,12 @@ int main(int argc, char* argv[])
     while (!isEof) {
         try {
             Queue< std::string > tokens = readLine< std::string >(*inputStream, isEof);
-            std::cout << "1\n";
-            tokens.print();
             Queue< std::string > postfixTokens = infixToPostfix< std::string >(tokens);
-            std::cout << "1\n";
-            postfixTokens.print();
+            
         } catch(const std::exception& e) {
             std::cerr << "Error: " << e.what() << "\n";
+        } catch (...) {
+            std::cerr << "Unknow exception";
         }
     }
     return 0;

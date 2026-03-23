@@ -52,13 +52,10 @@ namespace kitserov
   }
 
   template< class T >
-  Queue< T > infixToPostfix(Queue< T > infix)
+  Queue< T > infixToPostfix(Queue< T >& infix)
   {
-    std::cout << "Start func\n";
     Queue< T > postfix;
-    std::cout << "postfix";
     Stack< T > operations;
-    std::cout << "stack\n";
     while (true) {
       T token;
       try {
@@ -129,11 +126,8 @@ namespace kitserov
         operations.push(token);
         break;
       }
-      std::cout << "3\n";
     }
     
-    std::cout << "2\n";
-
     while (true) {
       T operationToken;
       try {

@@ -48,13 +48,10 @@ namespace kitserov
     {
       data_.clear();
     }
-    void print() const noexcept
-    {
-      printList(data_);
-    }
   private:
     List< T > data_;
   };
 }
+
 
 #endif
