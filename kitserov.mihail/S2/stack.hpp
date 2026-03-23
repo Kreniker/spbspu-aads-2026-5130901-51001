@@ -1,26 +1,32 @@
-#ifdef STACK_HPP
+#ifndef STACK_HPP
 #define STACK_HPP
 
-namespace kitserov {
+#include <stdexcept>
+#include "common/list.hpp"
 
- template < class T >
- class Stack {
+namespace kitserov
+{
+  template< class T >
+  class Stack
+  {
     List< T > data_;
   public:
-    void push(T& rhs)
+    void push(const T& rhs)
     {
       data_.add(rhs);
     }
-    T& drop()
+
+    T drop()
     {
       try {
-        T& value = data_.front();
+        T value = data_.front();
         data_.pop_front();
         return value;
-      } catch (const std::out_of_range& e) {
+      } catch (const std::out_of_range&) {
         throw std::out_of_range("Stack is empty");
       }
     }
+
     void clear()
     {
       data_.clear();

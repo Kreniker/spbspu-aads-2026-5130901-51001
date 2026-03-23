@@ -1,8 +1,10 @@
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <stdexcept>
 #include "queue.hpp"
 #include "stack.hpp"
-#include "utils.hpp"
+#include "utils2.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -14,20 +16,28 @@ int main(int argc, char* argv[])
     bool haveFilename = argc == 2;
 
     std::ifstream file;
-    std::istream& inputStream = std::cin;
+    std::istream* inputStream = &std::cin;
     if (haveFilename) {
         file.open(argv[1]);
         if (!file.is_open()) {
             std::cerr << "Failed to open file: " << argv[1] << "\n";
             return 1;
         }
-        inputStream = file;
+        inputStream = &file;
     }
 
     bool isEof = false;
     while (!isEof) {
-        Queue< std::string > tokens = readLine< std::string >(inputStream, isEof);
-        (void)tokens;
+        try {
+            Queue< std::string > tokens = readLine< std::string >(*inputStream, isEof);
+            std::cout << "1\n";
+            tokens.print();
+            Queue< std::string > postfixTokens = infixToPostfix< std::string >(tokens);
+            std::cout << "1\n";
+            postfixTokens.print();
+        } catch(const std::exception& e) {
+            std::cerr << "Error: " << e.what() << "\n";
+        }
     }
     return 0;
 }
