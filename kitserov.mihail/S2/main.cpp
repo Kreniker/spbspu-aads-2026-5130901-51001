@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
         try {
             Queue< std::string > tokens = readLine< std::string >(*inputStream, isEof);
             Queue< std::string > postfixTokens = infixToPostfix< std::string >(tokens);
-            
+            printQueue(postfixTokens);
         } catch(const std::exception& e) {
             std::cerr << "Error: " << e.what() << "\n";
         } catch (...) {

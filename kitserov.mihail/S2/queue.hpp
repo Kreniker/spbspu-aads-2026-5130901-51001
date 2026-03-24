@@ -12,20 +12,24 @@ namespace kitserov
   class Queue
   {
   public:
-    void push(const T& rhs)
+    void push(T& rhs)
     {
-      data_.add(rhs);
+      data_.insert_tail(rhs);
     }
 
     T drop()
     {
       try {
-        T value = data_.back();
-        data_.pop_back();
+        T value = data_.front();
+        data_.pop_front();
         return value;
       } catch (const std::out_of_range&) {
         throw std::out_of_range("Queue is empty");
       }
+    }
+    bool isEmpty()
+    {
+      return !(data_.get_size());
     }
     void swap(Queue& other) noexcept
     {
@@ -47,6 +51,10 @@ namespace kitserov
     void clear()
     {
       data_.clear();
+    }
+    List< T >& inList()
+    {
+      return data_;
     }
   private:
     List< T > data_;

@@ -11,20 +11,29 @@ namespace kitserov
   {
     List< T > data_;
   public:
-    void push(const T& rhs)
+    void push(T& rhs)
     {
-      data_.add(rhs);
+      data_.insert_tail(rhs);
     }
 
     T drop()
     {
       try {
-        T value = data_.front();
-        data_.pop_front();
+        T value = data_.back();
+        data_.pop_back();
         return value;
       } catch (const std::out_of_range&) {
         throw std::out_of_range("Stack is empty");
       }
+    }
+    T peek() const noexcept
+    {
+      return data_.back();
+    }
+
+    bool isEmpty()
+    {
+      return !(data_.get_size());
     }
 
     void clear()

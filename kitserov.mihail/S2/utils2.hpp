@@ -30,7 +30,7 @@ namespace kitserov
         break;
       }
 
-      queue.push(static_cast< T >(token));
+      queue.push(token);
     }
     return queue;
   }
@@ -54,96 +54,73 @@ namespace kitserov
   template< class T >
   Queue< T > infixToPostfix(Queue< T >& infix)
   {
-    Queue< T > postfix;
-    Stack< T > operations;
-    while (true) {
-      T token;
-      try {
-        token = infix.drop();
-      } catch (const std::out_of_range&) {
-        break;
-      }
+      Queue< T > postfix;
+      Stack< T > operations;
 
-      const std::string tokenString = token;
-      if (tokenString == "(") {
-        operations.push(token);
-        continue;
-      }
+      while (!infix.isEmpty())
+      {
+          T token = infix.drop();
 
-      if (tokenString == ")") {
-        bool hasOpenBracket = false;
-        while (true) {
-          T operationToken;
-          try {
-            operationToken = operations.drop();
-          } catch (const std::out_of_range&) {
-            break;
+          if (token == "(")
+          {
+              operations.push(token);
           }
-
-          const std::string operationString = operationToken;
-          if (operationString == "(") {
-            hasOpenBracket = true;
-            break;
+          else if (token == ")")
+          {
+              bool foundOpen = false;
+              while (!operations.isEmpty())
+              {
+                  T op = operations.drop();
+                  if (op == "(")
+                  {
+                      foundOpen = true;
+                      break;
+                  }
+                  postfix.push(op);
+              }
+              if (!foundOpen)
+              {
+                  throw std::logic_error("Invalid expression: no matching opening bracket");
+              }
           }
-          postfix.push(operationToken);
-        }
-
-        if (!hasOpenBracket) {
-          throw std::logic_error("Invalid expression: no matching opening bracket");
-        }
-        continue;
+          else if (isOperation(token))
+          {
+              while (!operations.isEmpty())
+              {
+                  T top = operations.drop();
+                  if (isOperation(top) && getOperationPriority(top) >= getOperationPriority(token))
+                  {
+                      postfix.push(top);
+                  }
+                  else
+                  {
+                      operations.push(top);
+                      break;
+                  }
+              }
+              operations.push(token);
+          }
+          else
+          {
+              postfix.push(token);
+          }
+      }
+      while (!operations.isEmpty())
+      {
+          T op = operations.drop();
+          if (op == "(" || op == ")")
+          {
+              throw std::invalid_argument("Mismatched parentheses");
+          }
+          postfix.push(op);
       }
 
-      if (!isOperation(tokenString)) {
-        postfix.push(token);
-        continue;
-      }
-
-      const int tokenPriority = getOperationPriority(tokenString);
-      while (true) {
-        T operationToken;
-        try {
-          operationToken = operations.drop();
-        } catch (const std::out_of_range&) {
-          operations.push(token);
-          break;
-        }
-
-        const std::string operationString = operationToken;
-        if (operationString == "(") {
-          operations.push(operationToken);
-          operations.push(token);
-          break;
-        }
-
-        const int operationPriority = getOperationPriority(operationString);
-        if (operationPriority >= tokenPriority) {
-          postfix.push(operationToken);
-          continue;
-        }
-
-        operations.push(operationToken);
-        operations.push(token);
-        break;
-      }
-    }
-    
-    while (true) {
-      T operationToken;
-      try {
-        operationToken = operations.drop();
-      } catch (const std::out_of_range&) {
-        break;
-      }
-
-      const std::string operationString = operationToken;
-      if (operationString == "(" || operationString == ")") {
-        throw std::logic_error("Invalid expression: mismatched brackets");
-      }
-      postfix.push(operationToken);
-    }
-
-    return postfix;
+      return postfix;
+  }
+  template < class T >
+  void printQueue(Queue< T >& queue)
+  {
+    printList(queue.inList());
   }
 }
 
