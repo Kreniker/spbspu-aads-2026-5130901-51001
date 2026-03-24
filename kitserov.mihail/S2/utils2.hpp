@@ -122,6 +122,56 @@ namespace kitserov
   {
     printList(queue.inList());
   }
+  template < class T >
+  T calculatePostfix(Queue< std::string >& queue)
+  {
+    Stack< T > stack;
+    while (!queue.isEmpty()) {
+      std::string token = queue.drop();
+      if (std::isdigit(token)) {
+        T value = static_cast< T >(token);
+        stack.push(value);
+      } else if (isOperation(token)) {
+        if (stack.isEmpty) {
+          throw std::logic_error("Not enough operands for operation " + token);
+        }
+        T r = stack.drop();
+        if (stack.isEmpty) {
+          throw std::logic_error("Not enough operands for operation " + token);
+        }
+        T l = stack.drop();
+        T result = 0;
+        if (token == "+") {
+          result = l + r;
+        } else if (token == "-") {
+          result = l - r;
+        } else if (token == "*") {
+          result = l * r;
+        } else if (token == "/") {
+          if (r == 0) {
+            throw std::logic_error("Division by zero");
+          }
+          result = l / r;
+        } else if (token == "%") {
+          if (r == 0) {
+            throw std::logic_error("Modulo by zero");
+          }
+          result = l % r;
+        }
+        stack.push(result);
+      } else {
+        throw std::invalid_argument("Invalid token: " + token);
+      }
+    }
+    if (stack.isEmpty()) {
+      throw std::logic_error("Empty expression");
+    }
+    T result = st.drop();
+    if (!stack.isEmpty()) {
+      throw std::logic_error("Too many values left on stack");
+    }
+    return result;
+  }
 }
 
 #endif
