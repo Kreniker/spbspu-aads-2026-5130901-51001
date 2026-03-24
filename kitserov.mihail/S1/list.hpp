@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <utility>
 
 namespace kitserov
 {
@@ -19,7 +20,7 @@ namespace kitserov
       node_(nullptr)
     {}
 
-    LIter(typename List< T >::Node* n) :
+    explicit LIter(typename List< T >::Node* n) :
       node_(n)
     {}
 
@@ -109,7 +110,12 @@ namespace kitserov
       T data_;
       Node* next_;
 
-      Node(T& v, Node* n = nullptr) :
+      Node(const T& v, Node* n = nullptr) :
+        data_(v),
+        next_(n)
+      {}
+
+      Node(T&& v, Node* n = nullptr) :
         data_(std::move(v)),
         next_(n)
       {}
@@ -125,22 +131,20 @@ namespace kitserov
       clear();
     }
 
-    List(List& other)
+    List(const List& other)
     {
-      for (LIter< T > it = other.begin(); it != other.end(); ++it) {
+      for (LCIter< T > it = other.cbegin(); it != other.cend(); ++it) {
         insert_tail(T(*it));
       }
     }
-    void operator()(List& other)
-    {
-      (*this).swap(other);
-    }
+
     void swap(List& other) noexcept
     {
       std::swap(head_, other.head_);
       std::swap(size_, other.size_);
     }
-    List& operator=(List& other)
+
+    List& operator=(const List& other)
     {
       if (this != &other) {
         List tmp(other);
@@ -223,7 +227,7 @@ namespace kitserov
       return LCIter< T >(current);
     }
 
-    LIter< T > add(T& v)
+    LIter< T > add(const T& v)
     {
       Node* newNode = new Node(v, head_);
       head_ = newNode;
@@ -231,7 +235,15 @@ namespace kitserov
       return LIter< T >(newNode);
     }
 
-    LIter< T > insert(T& v, LIter< T > pos)
+    LIter< T > add(T&& v)
+    {
+      Node* newNode = new Node(std::move(v), head_);
+      head_ = newNode;
+      size_++;
+      return LIter< T >(newNode);
+    }
+
+    LIter< T > insert(const T& v, LIter< T > pos)
     {
       size_++;
       if (!pos.node_) {
@@ -242,7 +254,18 @@ namespace kitserov
       return LIter< T >(newNode);
     }
 
-    LIter< T > insert_tail(T& v)
+    LIter< T > insert(T&& v, LIter< T > pos)
+    {
+      size_++;
+      if (!pos.node_) {
+        return add(std::move(v));
+      }
+      Node* newNode = new Node(std::move(v), pos.node_->next_);
+      pos.node_->next_ = newNode;
+      return LIter< T >(newNode);
+    }
+
+    LIter< T > insert_tail(const T& v)
     {
       if (size_ == 0) {
         return add(v);
@@ -253,9 +276,9 @@ namespace kitserov
     LIter< T > insert_tail(T&& v)
     {
       if (size_ == 0) {
-        return add(v);
+        return add(std::move(v));
       }
-      return insert(v, (*this)[size_ - 1]);
+      return insert(std::move(v), (*this)[size_ - 1]);
     }
 
     T& front()
@@ -374,9 +397,6 @@ namespace kitserov
     Node* head_;
     size_t size_;
   };
-
-  template class List< size_t >;
-  template class List< List< size_t > >;
 }
 
 #endif
