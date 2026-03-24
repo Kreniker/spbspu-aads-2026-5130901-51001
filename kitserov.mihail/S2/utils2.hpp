@@ -40,7 +40,7 @@ namespace kitserov
     if (operation == "+" || operation == "-") {
       return 1;
     }
-    if (operation == "*" || operation == "/" || operation == "%") {
+    if (operation == "*" || operation == "/" || operation == "%" || operation == "##") {
       return 2;
     }
     return 0;
@@ -48,7 +48,7 @@ namespace kitserov
 
   bool isOperation(const std::string& token)
   {
-    return token == "+" || token == "-" || token == "*" || token == "/" || token == "%";
+    return token == "+" || token == "-" || token == "*" || token == "/" || token == "%" || token == "##";
   }
 
   template< class T >
@@ -143,18 +143,21 @@ namespace kitserov
           if (start == token.size()) {
              isNumber = false;
           }
+          if (token[0] == '0') {
+            isNumber = false;
+          }
       }
 
       if (isNumber) {
-      T value;
-      if constexpr (std::is_same_v<T, int>) {
-          value = std::stoi(token);
-      } else if constexpr (std::is_same_v<T, double>) {
-          value = std::stod(token);
-      } else {
-          throw std::invalid_argument("Unsupported type");
-      }
-      stack.push(value);
+        T value;
+        if constexpr (std::is_same_v<T, int>) {
+            value = std::stoi(token);
+        } else if constexpr (std::is_same_v<T, double>) {
+            value = std::stod(token);
+        } else {
+            throw std::invalid_argument("Unsupported type");
+        }
+        stack.push(value);
       } else if (isOperation(token)) {
         if (stack.isEmpty()) {
           throw std::logic_error("Not enough operands for operation " + token);
@@ -181,6 +184,11 @@ namespace kitserov
             throw std::logic_error("Modulo by zero");
           }
           result = l % r;
+        } else if (token == "##") {
+          std::string concat;
+          concat = std::to_string(l) + std::to_string(r);
+          result = static_cast< T >(std::stoll(concat));
+
         }
         stack.push(result);
       } else {
