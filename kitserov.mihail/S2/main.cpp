@@ -26,13 +26,17 @@ int main(int argc, char* argv[])
         inputStream = &file;
     }
 
+    Queue< int > results;
     bool isEof = false;
     while (!isEof) {
         try {
             Queue< std::string > tokens = readLine< std::string >(*inputStream, isEof);
+            if (tokens.isEmpty()) {
+                continue;
+            }
             Queue< std::string > postfixTokens = infixToPostfix< std::string >(tokens);
-            printQueue(postfixTokens);
-            
+            int tmp = calculatePostfix< int >(postfixTokens);
+            results.push(tmp);
         } catch(const std::exception& e) {
             std::cerr << "Error: " << e.what() << "\n";
             return 1;
@@ -41,5 +45,6 @@ int main(int argc, char* argv[])
             return 1;
         }
     }
+    printQueue(results);
     return 0;
 }

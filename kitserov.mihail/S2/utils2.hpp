@@ -128,15 +128,39 @@ namespace kitserov
     Stack< T > stack;
     while (!queue.isEmpty()) {
       std::string token = queue.drop();
-      if (std::isdigit(token)) {
-        T value = static_cast< T >(token);
-        stack.push(value);
+      bool isNumber = false;
+      if (!token.empty()) {
+          size_t start = (token[0] == '-') ? 1 : 0;
+          if (start < token.size()) {
+              isNumber = true;
+              for (size_t i = start; i < token.size(); ++i) {
+                  if (!std::isdigit(static_cast< unsigned char >(token[i]))) {
+                      isNumber = false;
+                      break;
+                  }
+              }
+          }
+          if (start == token.size()) {
+             isNumber = false;
+          }
+      }
+
+      if (isNumber) {
+      T value;
+      if constexpr (std::is_same_v<T, int>) {
+          value = std::stoi(token);
+      } else if constexpr (std::is_same_v<T, double>) {
+          value = std::stod(token);
+      } else {
+          throw std::invalid_argument("Unsupported type");
+      }
+      stack.push(value);
       } else if (isOperation(token)) {
-        if (stack.isEmpty) {
+        if (stack.isEmpty()) {
           throw std::logic_error("Not enough operands for operation " + token);
         }
         T r = stack.drop();
-        if (stack.isEmpty) {
+        if (stack.isEmpty()) {
           throw std::logic_error("Not enough operands for operation " + token);
         }
         T l = stack.drop();
@@ -166,7 +190,7 @@ namespace kitserov
     if (stack.isEmpty()) {
       throw std::logic_error("Empty expression");
     }
-    T result = st.drop();
+    T result = stack.drop();
     if (!stack.isEmpty()) {
       throw std::logic_error("Too many values left on stack");
     }
