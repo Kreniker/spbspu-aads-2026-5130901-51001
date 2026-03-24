@@ -5,16 +5,20 @@
 #include "common/list.hpp"
 #include "common/utils.hpp"
 
-
 namespace kitserov
 {
   template< class T >
   class Queue
   {
   public:
-    void push(T& rhs)
+    void push(const T& rhs)
     {
       data_.insert_tail(rhs);
+    }
+
+    void push(T&& rhs)
+    {
+      data_.insert_tail(std::move(rhs));
     }
 
     T drop()
@@ -27,23 +31,30 @@ namespace kitserov
         throw std::out_of_range("Queue is empty");
       }
     }
-    bool isEmpty()
+
+    bool isEmpty() const noexcept
     {
-      return !(data_.get_size());
+      return data_.get_size() == 0;
     }
+
     void swap(Queue& other) noexcept
     {
       std::swap(data_, other.data_);
     }
-    void operator()(Queue& other)
-    {
-      (*this).swap(other);
-    }
+
     Queue& operator=(const Queue& other)
     {
-      if (data_ != &other.data_) {
-        List tmp(other);
+      if (this != &other) {
+        Queue tmp(other);
         swap(tmp);
+      }
+      return *this;
+    }
+
+    Queue& operator=(Queue&& other) noexcept
+    {
+      if (this != &other) {
+        data_ = std::move(other.data_);
       }
       return *this;
     }
@@ -52,14 +63,20 @@ namespace kitserov
     {
       data_.clear();
     }
+
     List< T >& inList()
     {
       return data_;
     }
+
+    const List< T >& inList() const
+    {
+      return data_;
+    }
+
   private:
     List< T > data_;
   };
 }
-
 
 #endif

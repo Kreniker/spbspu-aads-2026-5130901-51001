@@ -18,7 +18,7 @@ namespace kitserov
     while (true) {
       const int nextChar = in.peek();
       if (nextChar == EOF) {
-          isEof = true;
+        isEof = true;
         break;
       }
       if (nextChar == '\n') {
@@ -48,80 +48,66 @@ namespace kitserov
 
   bool isOperation(const std::string& token)
   {
-    return token == "+" || token == "-" || token == "*" || token == "/" || token == "%" || token == "##";
+    return token == "+" || token == "-" || token == "*" || token == "/"
+           || token == "%" || token == "##";
   }
 
   template< class T >
   Queue< T > infixToPostfix(Queue< T >& infix)
   {
-      Queue< T > postfix;
-      Stack< T > operations;
+    Queue< T > postfix;
+    Stack< T > operations;
 
-      while (!infix.isEmpty())
-      {
-          T token = infix.drop();
+    while (!infix.isEmpty()) {
+      T token = infix.drop();
 
-          if (token == "(")
-          {
-              operations.push(token);
-          }
-          else if (token == ")")
-          {
-              bool foundOpen = false;
-              while (!operations.isEmpty())
-              {
-                  T op = operations.drop();
-                  if (op == "(")
-                  {
-                      foundOpen = true;
-                      break;
-                  }
-                  postfix.push(op);
-              }
-              if (!foundOpen)
-              {
-                  throw std::logic_error("Invalid expression: no matching opening bracket");
-              }
-          }
-          else if (isOperation(token))
-          {
-              while (!operations.isEmpty())
-              {
-                  T top = operations.drop();
-                  if (isOperation(top) && getOperationPriority(top) >= getOperationPriority(token))
-                  {
-                      postfix.push(top);
-                  }
-                  else
-                  {
-                      operations.push(top);
-                      break;
-                  }
-              }
-              operations.push(token);
-          }
-          else
-          {
-              postfix.push(token);
-          }
-      }
-      while (!operations.isEmpty())
-      {
+      if (token == "(") {
+        operations.push(token);
+      } else if (token == ")") {
+        bool foundOpen = false;
+        while (!operations.isEmpty()) {
           T op = operations.drop();
-          if (op == "(" || op == ")")
-          {
-              throw std::invalid_argument("Mismatched parentheses");
+          if (op == "(") {
+            foundOpen = true;
+            break;
           }
           postfix.push(op);
+        }
+        if (!foundOpen) {
+          throw std::logic_error("Invalid expression: no matching opening bracket");
+        }
+      } else if (isOperation(token)) {
+        while (!operations.isEmpty()) {
+          T top = operations.drop();
+          if (isOperation(top) && getOperationPriority(top) >= getOperationPriority(token)) {
+            postfix.push(top);
+          } else {
+            operations.push(top);
+            break;
+          }
+        }
+        operations.push(token);
+      } else {
+        postfix.push(token);
       }
+    }
+    while (!operations.isEmpty()) {
+      T op = operations.drop();
+      if (op == "(" || op == ")") {
+        throw std::invalid_argument("Mismatched parentheses");
+      }
+      postfix.push(op);
+    }
 
-      return postfix;
+    return postfix;
   }
+
   template < class T >
   void printQueue(Queue< T >& queue)
   {
     printList(queue.inList());
   }
+
   template < class T >
   T calculatePostfix(Queue< std::string >& queue)
   {
@@ -130,32 +116,32 @@ namespace kitserov
       std::string token = queue.drop();
       bool isNumber = false;
       if (!token.empty()) {
-          size_t start = (token[0] == '-') ? 1 : 0;
-          if (start < token.size()) {
-              isNumber = true;
-              for (size_t i = start; i < token.size(); ++i) {
-                  if (!std::isdigit(static_cast< unsigned char >(token[i]))) {
-                      isNumber = false;
-                      break;
-                  }
-              }
+        size_t start = (token[0] == '-') ? 1 : 0;
+        if (start < token.size()) {
+          isNumber = true;
+          for (size_t i = start; i < token.size(); ++i) {
+            if (!std::isdigit(static_cast< unsigned char >(token[i]))) {
+              isNumber = false;
+              break;
+            }
           }
-          if (start == token.size()) {
-             isNumber = false;
-          }
-          if (token[0] == '0') {
-            isNumber = false;
-          }
+        }
+        if (start == token.size()) {
+          isNumber = false;
+        }
+        if (token[0] == '0') {
+          isNumber = false;
+        }
       }
 
       if (isNumber) {
         T value;
-        if constexpr (std::is_same_v<T, int>) {
-            value = std::stoi(token);
-        } else if constexpr (std::is_same_v<T, double>) {
-            value = std::stod(token);
+        if constexpr (std::is_same_v< T, int >) {
+          value = std::stoi(token);
+        } else if constexpr (std::is_same_v< T, double >) {
+          value = std::stod(token);
         } else {
-            throw std::invalid_argument("Unsupported type");
+          throw std::invalid_argument("Unsupported type");
         }
         stack.push(value);
       } else if (isOperation(token)) {
@@ -185,10 +171,8 @@ namespace kitserov
           }
           result = l % r;
         } else if (token == "##") {
-          std::string concat;
-          concat = std::to_string(l) + std::to_string(r);
+          std::string concat = std::to_string(l) + std::to_string(r);
           result = static_cast< T >(std::stoll(concat));
-
         }
         stack.push(result);
       } else {
