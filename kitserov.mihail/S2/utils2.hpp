@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <cctype>
+#include <limits>
 #include "queue.hpp"
 #include "stack.hpp"
 
@@ -129,20 +131,13 @@ namespace kitserov
         if (start == token.size()) {
           isNumber = false;
         }
-        if (token[0] == '0') {
+        if (isNumber && token[start] == '0' && (start + 1) < token.size()) {
           isNumber = false;
         }
       }
 
       if (isNumber) {
-        T value;
-        if constexpr (std::is_same_v< T, int >) {
-          value = std::stoi(token);
-        } else if constexpr (std::is_same_v< T, double >) {
-          value = std::stod(token);
-        } else {
-          throw std::invalid_argument("Unsupported type");
-        }
+        T value = static_cast< T >(std::stoll(token));
         stack.push(value);
       } else if (isOperation(token)) {
         if (stack.isEmpty()) {
@@ -155,21 +150,33 @@ namespace kitserov
         T l = stack.drop();
         T result = 0;
         if (token == "+") {
-          result = l + r;
+          if (__builtin_add_overflow(l, r, &result)) {
+            throw std::overflow_error("Overflow in addition");
+          }
         } else if (token == "-") {
-          result = l - r;
+          if (__builtin_sub_overflow(l, r, &result)) {
+            throw std::overflow_error("Overflow in subtraction");
+          }
         } else if (token == "*") {
-          result = l * r;
+          if (__builtin_mul_overflow(l, r, &result)) {
+            throw std::overflow_error("Overflow in multiplication");
+          }
         } else if (token == "/") {
           if (r == 0) {
             throw std::logic_error("Division by zero");
+          }
+          if (l == std::numeric_limits< T >::min() && r == -1) {
+            throw std::overflow_error("Overflow in division");
           }
           result = l / r;
         } else if (token == "%") {
           if (r == 0) {
             throw std::logic_error("Modulo by zero");
           }
-          result = l % r;
+          if (l == std::numeric_limits< T >::min() && r == -1) {
+            throw std::overflow_error("Overflow in modulo");
+          }
+          result = ((l % r) + r) % r;
         } else if (token == "##") {
           std::string concat = std::to_string(l) + std::to_string(r);
           result = static_cast< T >(std::stoll(concat));

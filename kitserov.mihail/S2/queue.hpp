@@ -11,6 +11,32 @@ namespace kitserov
   class Queue
   {
   public:
+    Queue() = default;
+    ~Queue()
+    {
+      clear();
+    }
+    Queue(const Queue& other) : data_(other.data_) {}
+    Queue(Queue&& other) noexcept
+    {
+      swap(other);
+    }
+    Queue& operator=(const Queue& other)
+    {
+      if (this != &other) {
+        Queue tmp(other);
+        swap(tmp);
+      }
+      return *this;
+    }
+
+    Queue& operator=(Queue&& other) noexcept
+    {
+      if (this != &other) {
+        data_ = std::move(other.data_);
+      }
+      return *this;
+    }
     void push(const T& rhs)
     {
       data_.insert_tail(rhs);
@@ -39,24 +65,7 @@ namespace kitserov
 
     void swap(Queue& other) noexcept
     {
-      std::swap(data_, other.data_);
-    }
-
-    Queue& operator=(const Queue& other)
-    {
-      if (this != &other) {
-        Queue tmp(other);
-        swap(tmp);
-      }
-      return *this;
-    }
-
-    Queue& operator=(Queue&& other) noexcept
-    {
-      if (this != &other) {
-        data_ = std::move(other.data_);
-      }
-      return *this;
+      data_.swap(other.data_);
     }
 
     void clear()

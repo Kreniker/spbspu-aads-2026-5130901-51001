@@ -10,6 +10,13 @@ namespace kitserov
   class Stack
   {
   public:
+    Stack() = default;
+    ~Stack()
+    {
+      clear();
+    }
+    Stack(const Stack& other) : data_(other.data_) {}
+    Stack(Stack&& other) noexcept : data_(std::move(other.data_)) {}
     void push(const T& rhs)
     {
       data_.insert_tail(rhs);
@@ -46,14 +53,6 @@ namespace kitserov
       std::swap(data_, other.data_);
     }
 
-    Stack(const Stack& other) :
-      data_(other.data_)
-    {}
-
-    Stack(Stack&& other) noexcept :
-      data_(std::move(other.data_))
-    {}
-
     Stack& operator=(const Stack& other)
     {
       if (this != &other) {
@@ -74,8 +73,6 @@ namespace kitserov
     {
       data_.clear();
     }
-
-    ~Stack() = default;
 
   private:
     List< T > data_;

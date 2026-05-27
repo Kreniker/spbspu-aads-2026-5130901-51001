@@ -5,18 +5,19 @@
 #include <string>
 #include <algorithm>
 #include <stdexcept>
+#include <istream>
 #include "graph.hpp"
 
 namespace kitserov
 {
 
 using HashGraphs = HashTable<std::string, Graph,
-                              SipHash<std::string>,
-                              std::equal_to<std::string> >;
+                              SipHash< std::string >,
+                              std::equal_to< std::string > >;
 
 void cmd_graphs(std::ostream& out, std::istream&, HashGraphs& graphs)
 {
-  std::vector<std::string> tmp;
+  std::vector< std::string > tmp;
   for (auto it = graphs.begin(); it != graphs.end(); ++it)
   {
     tmp.push_back(it.key());
@@ -25,6 +26,9 @@ void cmd_graphs(std::ostream& out, std::istream&, HashGraphs& graphs)
   for (const auto& i : tmp)
   {
     out << i << "\n";
+  }
+  if (tmp.size() == 0) {
+    out << "\n";
   }
 }
 
@@ -40,10 +44,13 @@ void cmd_vertexes(std::ostream& out, std::istream& in, HashGraphs& graphs)
   {
     throw std::invalid_argument("graph not found: " + graphName);
   }
-  std::vector<std::string> vertices = graph->getVertices();
+  std::vector< std::string > vertices = graph -> getVertices();
   for (const auto& v : vertices)
   {
     out << v << "\n";
+  }
+  if (vertices.size() == 0) {
+    out << "\n";
   }
 }
 
@@ -56,11 +63,11 @@ void cmd_outbound(std::ostream& out, std::istream& in, HashGraphs& graphs)
     throw std::invalid_argument("invalid graph name or vertex");
   }
   Graph* graph = graphs.find(graphName);
-  if (!graph || !(graph->hasVertex(vertex)))
+  if (!graph || !(graph -> hasVertex(vertex)))
   {
     throw std::invalid_argument("graph or vertex not found");
   }
-  auto result = graph->getOutbound(vertex);
+  auto result = graph -> getOutbound(vertex);
   for (const auto& p : result)
   {
     out << p.first;
@@ -69,6 +76,9 @@ void cmd_outbound(std::ostream& out, std::istream& in, HashGraphs& graphs)
       out << ' ' << w;
     }
     out << '\n';
+  }
+  if (result.size() == 0) {
+    out << "\n";
   }
 }
 
@@ -81,11 +91,11 @@ void cmd_inbound(std::ostream& out, std::istream& in, HashGraphs& graphs)
     throw std::invalid_argument("invalid graph name or vertex");
   }
   Graph* graph = graphs.find(graphName);
-  if (!graph || !(graph->hasVertex(vertex)))
+  if (!graph || !(graph -> hasVertex(vertex)))
   {
     throw std::invalid_argument("graph or vertex not found");
   }
-  auto result = graph->getInbound(vertex);
+  auto result = graph -> getInbound(vertex);
   for (const auto& p : result)
   {
     out << p.first;
@@ -94,6 +104,9 @@ void cmd_inbound(std::ostream& out, std::istream& in, HashGraphs& graphs)
       out << ' ' << w;
     }
     out << '\n';
+  }
+  if (result.size() == 0) {
+    out << "\n";
   }
 }
 
@@ -112,7 +125,7 @@ void cmd_bind(std::ostream&, std::istream& in, HashGraphs& graphs)
   {
     throw std::invalid_argument("graph not found: " + graphName);
   }
-  graph->addEdge(src, dst, weight);
+  graph -> addEdge(src, dst, weight);
 }
 
 void cmd_cut(std::ostream&, std::istream& in, HashGraphs& graphs)
@@ -130,7 +143,7 @@ void cmd_cut(std::ostream&, std::istream& in, HashGraphs& graphs)
   {
     throw std::invalid_argument("graph not found: " + graphName);
   }
-  if (!(graph->cut(src, dst, weight)))
+  if (!(graph -> cut(src, dst, weight)))
   {
     throw std::runtime_error("cut failed: edge not found");
   }
@@ -140,7 +153,7 @@ void cmd_create(std::ostream&, std::istream& in, HashGraphs& graphs)
 {
   std::string graphName;
   size_t count;
-  if (!(in >> graphName >> count))
+  if (!(in >> graphName))
   {
     throw std::invalid_argument("invalid arguments for create");
   }
@@ -148,7 +161,11 @@ void cmd_create(std::ostream&, std::istream& in, HashGraphs& graphs)
   {
     throw std::invalid_argument("graph already exists: " + graphName);
   }
-  std::vector<std::string> vertices(count);
+  if (!(in >> count))
+  {
+    throw std::invalid_argument("invalid arguments for create");
+  }
+  std::vector< std::string > vertices(count);
   for (size_t i = 0; i < count; ++i)
   {
     if (!(in >> vertices[i]))
@@ -199,7 +216,7 @@ void cmd_extract(std::ostream&, std::istream& in, HashGraphs& graphs)
   {
     throw std::invalid_argument("source graph not found: " + oldName);
   }
-  std::vector<std::string> vertices(count);
+  std::vector< std::string > vertices(count);
   for (size_t i = 0; i < count; ++i)
   {
     if (!(in >> vertices[i]))
@@ -209,7 +226,7 @@ void cmd_extract(std::ostream&, std::istream& in, HashGraphs& graphs)
   }
   for (const auto& v : vertices)
   {
-    if (!(oldGraph->hasVertex(v)))
+    if (!(oldGraph -> hasVertex(v)))
     {
       throw std::invalid_argument("vertex not found: " + v);
     }

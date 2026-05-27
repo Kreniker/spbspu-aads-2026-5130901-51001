@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     inputStream = &file;
   }
 
-  Queue< int > results;
+  Stack< long long > results;
   bool isEof = false;
 
   while (!isEof) {
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
         continue;
       }
       Queue< std::string > postfixTokens = infixToPostfix< std::string >(tokens);
-      int tmp = calculatePostfix< int >(postfixTokens);
+      long long tmp = calculatePostfix< long long >(postfixTokens);
       results.push(tmp);
     } catch (const std::exception& e) {
       std::cerr << "Error: " << e.what() << "\n";
@@ -49,6 +49,14 @@ int main(int argc, char* argv[])
     }
   }
 
-  printQueue(results);
+  bool isFirst = true;
+  while (!results.isEmpty()) {
+    if (!isFirst) {
+      std::cout << " ";
+    }
+    std::cout << results.drop();
+    isFirst = false;
+  }
+  std::cout << "\n";
   return 0;
 }
