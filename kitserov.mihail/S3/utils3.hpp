@@ -141,7 +141,7 @@ void cmd_create(std::ostream&, std::istream& in, HashGraphs& graphs)
 {
   std::string graphName;
   size_t count;
-  if (!(in >> graphName >> count))
+  if (!(in >> graphName))
   {
     throw std::invalid_argument("invalid arguments for create");
   }
@@ -149,7 +149,11 @@ void cmd_create(std::ostream&, std::istream& in, HashGraphs& graphs)
   {
     throw std::invalid_argument("graph already exists: " + graphName);
   }
-  std::vector<std::string> vertices(count);
+  if (!(in >> count))
+  {
+    throw std::invalid_argument("invalid arguments for create");
+  }
+  std::vector< std::string > vertices(count);
   for (size_t i = 0; i < count; ++i)
   {
     if (!(in >> vertices[i]))
