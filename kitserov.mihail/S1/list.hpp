@@ -131,7 +131,9 @@ namespace kitserov
       clear();
     }
 
-    List(const List& other)
+    List(const List& other) :
+      head_(nullptr),
+      size_(0)
     {
       for (LCIter< T > it = other.cbegin(); it != other.cend(); ++it) {
         insert_tail(T(*it));
@@ -245,23 +247,23 @@ namespace kitserov
 
     LIter< T > insert(const T& v, LIter< T > pos)
     {
-      size_++;
       if (!pos.node_) {
         return add(v);
       }
       Node* newNode = new Node(v, pos.node_->next_);
       pos.node_->next_ = newNode;
+      size_++;
       return LIter< T >(newNode);
     }
 
     LIter< T > insert(T&& v, LIter< T > pos)
     {
-      size_++;
       if (!pos.node_) {
         return add(std::move(v));
       }
       Node* newNode = new Node(std::move(v), pos.node_->next_);
       pos.node_->next_ = newNode;
+      size_++;
       return LIter< T >(newNode);
     }
 

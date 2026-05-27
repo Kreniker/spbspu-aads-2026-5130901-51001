@@ -1,6 +1,4 @@
-#define BOOST_TEST_MODULE S1
-#define BOOST_TEST_NO_MAIN
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include "list.hpp"
 #include "utils.hpp"
 
@@ -125,28 +123,28 @@ BOOST_AUTO_TEST_CASE(clear_list)
 
 BOOST_AUTO_TEST_CASE(move_constructor)
 {
-  kitserov::List< size_t > lst1;
+  kitserov::List< size_t > list1;
   size_t val = 100;
-  lst1.add(val);
-  kitserov::List< size_t > lst2 = std::move(lst1);
-  BOOST_TEST(lst2.get_size() == 1);
-  BOOST_TEST(lst2.front() == 100);
-  BOOST_TEST(lst1.get_size() == 0);
-  BOOST_CHECK(lst1.begin() == lst1.end());
+  list1.add(val);
+  kitserov::List< size_t > list2 = std::move(list1);
+  BOOST_TEST(list2.get_size() == 1);
+  BOOST_TEST(list2.front() == 100);
+  BOOST_TEST(list1.get_size() == 0);
+  BOOST_CHECK(list1.begin() == list1.end());
 }
 
 BOOST_AUTO_TEST_CASE(move_assignment)
 {
-  kitserov::List< size_t > lst1;
-  kitserov::List< size_t > lst2;
+  kitserov::List< size_t > list1;
+  kitserov::List< size_t > list2;
   size_t val1 = 10;
   size_t val2 = 20;
-  lst1.add(val1);
-  lst2.add(val2);
-  lst2 = std::move(lst1);
-  BOOST_TEST(lst2.get_size() == 1);
-  BOOST_TEST(lst2.front() == 10);
-  BOOST_TEST(lst1.get_size() == 0);
+  list1.add(val1);
+  list2.add(val2);
+  list2 = std::move(list1);
+  BOOST_TEST(list2.get_size() == 1);
+  BOOST_TEST(list2.front() == 10);
+  BOOST_TEST(list1.get_size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(iterator_modification)

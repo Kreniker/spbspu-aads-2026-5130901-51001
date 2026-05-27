@@ -20,7 +20,7 @@ namespace kitserov
       node_(nullptr)
     {}
 
-    LIter(typename List< T >::Node* n) :
+    explicit LIter(typename List< T >::Node* n) :
       node_(n)
     {}
 
@@ -131,21 +131,21 @@ namespace kitserov
       clear();
     }
 
-    List(const List& other)
+    List(const List& other) :
+      head_(nullptr),
+      size_(0)
     {
       for (LCIter< T > it = other.cbegin(); it != other.cend(); ++it) {
         insert_tail(T(*it));
       }
     }
-    void operator()(List& other)
-    {
-      (*this).swap(other);
-    }
+
     void swap(List& other) noexcept
     {
       std::swap(head_, other.head_);
       std::swap(size_, other.size_);
     }
+
     List& operator=(const List& other)
     {
       if (this != &other) {
@@ -237,18 +237,37 @@ namespace kitserov
       return LIter< T >(newNode);
     }
 
-    LIter< T > insert(T& v, LIter< T > pos)
+    LIter< T > add(T&& v)
     {
+      Node* newNode = new Node(std::move(v), head_);
+      head_ = newNode;
       size_++;
+      return LIter< T >(newNode);
+    }
+
+    LIter< T > insert(const T& v, LIter< T > pos)
+    {
       if (!pos.node_) {
         return add(v);
       }
       Node* newNode = new Node(v, pos.node_->next_);
       pos.node_->next_ = newNode;
+      size_++;
       return LIter< T >(newNode);
     }
 
-    LIter< T > insert_tail(T& v)
+    LIter< T > insert(T&& v, LIter< T > pos)
+    {
+      if (!pos.node_) {
+        return add(std::move(v));
+      }
+      Node* newNode = new Node(std::move(v), pos.node_->next_);
+      pos.node_->next_ = newNode;
+      size_++;
+      return LIter< T >(newNode);
+    }
+
+    LIter< T > insert_tail(const T& v)
     {
       if (size_ == 0) {
         return add(v);
@@ -259,9 +278,9 @@ namespace kitserov
     LIter< T > insert_tail(T&& v)
     {
       if (size_ == 0) {
-        return add(v);
+        return add(std::move(v));
       }
-      return insert(v, (*this)[size_ - 1]);
+      return insert(std::move(v), (*this)[size_ - 1]);
     }
 
     T& front()
@@ -380,9 +399,6 @@ namespace kitserov
     Node* head_;
     size_t size_;
   };
-
-  template class List< size_t >;
-  template class List< List< size_t > >;
 }
 
 #endif
