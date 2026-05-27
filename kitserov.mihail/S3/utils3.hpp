@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include <stdexcept>
+#include <istream>
 #include "graph.hpp"
 
 namespace kitserov
