@@ -1,7 +1,5 @@
-#define BOOST_TEST_MODULE HashTests
-
 #include <utility>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include "hash.hpp"
 
 using namespace kitserov;
