@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(load_factor)
 {
   HashTable< int, int, SipHash< int >, std::equal_to< int > > r(5);
   r.add(4, 16);
-  BOOST_CHECK_EQUAL(r.loadFactor(), (1.0 / 5.0));
+  BOOST_CHECK(r.loadFactor() == 1.0f / 5.0f);
 }
 
 BOOST_AUTO_TEST_CASE(square_staples)
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(rehash)
   r.rehash(10);
   BOOST_CHECK_EQUAL(r.size(), 3);
   BOOST_CHECK_EQUAL(r.capacity(), 10);
-  BOOST_CHECK_EQUAL(r.loadFactor(), (3.0 / 10.0));
+  BOOST_CHECK(r.loadFactor() == 3.0f / 10.0f);
   BOOST_CHECK(r.find(4));
   BOOST_CHECK(r.find(5));
   BOOST_CHECK(r.find(6));

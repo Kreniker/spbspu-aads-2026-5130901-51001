@@ -225,7 +225,7 @@ public:
     {
       return 1.0f;
     }
-    return static_cast<float>(size_) / static_cast<float>(capacity_);
+    return static_cast< float >(size_) / static_cast< float >(capacity_);
   }
 
   size_t size() const noexcept
