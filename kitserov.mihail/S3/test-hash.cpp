@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(square_staples)
   BOOST_CHECK_EQUAL(r[4], 16);
 }
 
-BOOST_AUTO_TEST_CASE(read)
+BOOST_AUTO_TEST_CASE(hash_read)
 {
   HashTable< int, int, SipHash< int >, std::equal_to< int > > r(5);
   r.add(4, 16);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(read)
   BOOST_CHECK_EQUAL(r[4], 17);
 }
 
-BOOST_AUTO_TEST_CASE(erase)
+BOOST_AUTO_TEST_CASE(hash_erase)
 {
   HashTable< int, int, SipHash< int >, std::equal_to< int > > r(5);
   r.add(4, 16);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(erase)
   BOOST_CHECK_EQUAL(r.find(4), nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(rehash)
+BOOST_AUTO_TEST_CASE(hash_rehash)
 {
   HashTable< int, int, SipHash< int >, std::equal_to< int > > r(5);
   r.add(4, 16);
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(rehash)
   BOOST_CHECK(r.find(6));
 }
 
-BOOST_AUTO_TEST_CASE(begin_and_end)
+BOOST_AUTO_TEST_CASE(hash_begin_and_end)
 {
   HashTable< int, int, SipHash< int >, std::equal_to< int > > r(5);
   r.add(4, 16);
