@@ -22,9 +22,13 @@ void printHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   }
 
   auto treePtr = trees.find(name);
-  if (!treePtr || treePtr -> empty())
+  if (!treePtr) {
+    throw std::invalid_argument("");
+  }
+  if (treePtr -> empty())
   {
     out << "<EMPTY>\n";
+    return;
   }
 
   out << name;
