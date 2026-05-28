@@ -35,7 +35,7 @@ void printHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   out << '\n';
 }
 
-void complementHandler(std::ostream& out, std::istream& in, TreesTable& trees)
+void complementHandler(std::ostream&, std::istream& in, TreesTable& trees)
 {
   std::string newName, aName, bName;
   if (!(in >> newName >> aName >> bName))
@@ -66,7 +66,7 @@ void complementHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   trees.add(newName, result);
 }
 
-void intersectHandler(std::ostream& out, std::istream& in, TreesTable& trees)
+void intersectHandler(std::ostream&, std::istream& in, TreesTable& trees)
 {
   std::string newName, aName, bName;
   if (!(in >> newName >> aName >> bName))
@@ -95,7 +95,7 @@ void intersectHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   trees.add(newName, result);
 }
 
-void unionHandler(std::ostream& out, std::istream& in, TreesTable& trees)
+void unionHandler(std::ostream&, std::istream& in, TreesTable& trees)
 {
   std::string newName, aName, bName;
   if (!(in >> newName >> aName >> bName))
