@@ -46,9 +46,7 @@ void complementHandler(std::ostream&, std::istream& in, TreesTable& trees)
   {
     throw std::invalid_argument("");
   }
-  if (newName == aName || newName == bName) {
-    throw std::invalid_argument("");
-  }
+
   auto aPtr = trees.find(aName);
   auto bPtr = trees.find(bName);
 
