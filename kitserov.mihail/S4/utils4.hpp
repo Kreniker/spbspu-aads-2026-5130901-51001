@@ -72,7 +72,6 @@ void intersectHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   if (!(in >> newName >> aName >> bName))
   {
     throw std::invalid_argument("");
-    return;
   }
 
   auto aPtr = trees.find(aName);
@@ -89,6 +88,8 @@ void intersectHandler(std::ostream& out, std::istream& in, TreesTable& trees)
         result.push(key, it -> second);
       }
     }
+  } else {
+    throw std::invalid_argument("");
   }
 
   trees.add(newName, result);
@@ -100,7 +101,6 @@ void unionHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   if (!(in >> newName >> aName >> bName))
   {
     throw std::invalid_argument("");
-    return;
   }
 
   auto aPtr = trees.find(aName);
@@ -113,6 +113,8 @@ void unionHandler(std::ostream& out, std::istream& in, TreesTable& trees)
     {
       result.push(it -> first, it -> second);
     }
+  } else {
+    throw std::invalid_argument("");
   }
   if (bPtr)
   {
@@ -123,6 +125,8 @@ void unionHandler(std::ostream& out, std::istream& in, TreesTable& trees)
         result.push(it -> first, it -> second);
       }
     }
+  } else {
+    throw std::invalid_argument("");
   }
 
   trees.add(newName, result);
