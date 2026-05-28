@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <stdexcept>
 #include "common/hash.hpp"
 #include "bitree.hpp"
 
@@ -17,15 +18,13 @@ void printHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   std::string name;
   if (!(in >> name))
   {
-    out << "< INVALID COMMAND >\n";
-    return;
+    throw std::invalid_argument("");
   }
 
   auto treePtr = trees.find(name);
   if (!treePtr || treePtr -> empty())
   {
-    out << "< EMPTY >\n";
-    return;
+    out << "<EMPTY>\n";
   }
 
   out << name;
@@ -41,10 +40,11 @@ void complementHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   std::string newName, aName, bName;
   if (!(in >> newName >> aName >> bName))
   {
-    out << "< INVALID COMMAND >\n";
-    return;
+    throw std::invalid_argument("");
   }
-
+  if (newName == aName || newName == bName) {
+    throw std::invalid_argument("");
+  }
   auto aPtr = trees.find(aName);
   auto bPtr = trees.find(bName);
 
@@ -59,6 +59,8 @@ void complementHandler(std::ostream& out, std::istream& in, TreesTable& trees)
         result.push(key, it -> second);
       }
     }
+  } else {
+    throw std::invalid_argument("");
   }
 
   trees.add(newName, result);
@@ -69,7 +71,7 @@ void intersectHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   std::string newName, aName, bName;
   if (!(in >> newName >> aName >> bName))
   {
-    out << "< INVALID COMMAND >\n";
+    throw std::invalid_argument("");
     return;
   }
 
@@ -97,7 +99,7 @@ void unionHandler(std::ostream& out, std::istream& in, TreesTable& trees)
   std::string newName, aName, bName;
   if (!(in >> newName >> aName >> bName))
   {
-    out << "< INVALID COMMAND >\n";
+    throw std::invalid_argument("");
     return;
   }
 
