@@ -34,7 +34,8 @@ namespace kitserov
     Hash2 hash2_;
     size_t size_;
     size_t capacity_;
-    Slot* slots_;
+    Slot* slots1_;
+    Slot* slots2_;
 
     static size_t normalizeCapacity(size_t capacity) noexcept
     {
@@ -74,7 +75,18 @@ namespace kitserov
       return half + (hash2_(key) % half);
     }
 
-    bool insertInto(Slot* table, size_t tableCapacity,
+    const Slot& slotAt(size_t index) const noexcept
+    {
+      size_t half = halfCapacity(capacity_);
+      return index < half ? slots1_[index] : slots2_[index - half];
+    }
+    Slot& slotAt(size_t index) noexcept
+    {
+      size_t half = halfCapacity(capacity_);
+      return index < half ? slots1_[index] : slots2_[index - half];
+    }
+
+    bool insertPair(Slot* firstTable, Slot* secondTable, size_t tableCapacity,
                     const Key& key, const Value& value, size_t& tableSize) const
     {
       if (tableCapacity == 0)
@@ -82,15 +94,15 @@ namespace kitserov
         return false;
       }
 
+      size_t half = tableCapacity / 2;
       Key currentKey = key;
       Value currentValue = value;
       bool useFirst = true;
 
       for (size_t step = 0; step < tableCapacity; ++step)
       {
-        size_t index = useFirst ? firstIndex(currentKey, tableCapacity)
-                                : secondIndex(currentKey, tableCapacity);
-        Slot& slot = table[index];
+        size_t index = useFirst ? (hash1_(currentKey) % half) : (hash2_(currentKey) % half);
+        Slot& slot = useFirst ? firstTable[index] : secondTable[index];
 
         if (slot.state_ == State::EMPTY || slot.state_ == State::TOMBSTONE)
         {
@@ -123,16 +135,17 @@ namespace kitserov
         return capacity_;
       }
 
-      size_t first = firstIndex(key, capacity_);
-      if (slots_[first].state_ == State::OCCUPIED && equal_(slots_[first].key_, key))
+      size_t half = halfCapacity(capacity_);
+      size_t first = hash1_(key) % half;
+      if (slots1_[first].state_ == State::OCCUPIED && equal_(slots1_[first].key_, key))
       {
         return first;
       }
 
-      size_t second = secondIndex(key, capacity_);
-      if (slots_[second].state_ == State::OCCUPIED && equal_(slots_[second].key_, key))
+      size_t second = hash2_(key) % half;
+      if (slots2_[second].state_ == State::OCCUPIED && equal_(slots2_[second].key_, key))
       {
-        return second;
+        return half + second;
       }
 
       return capacity_;
@@ -140,8 +153,10 @@ namespace kitserov
 
     void destroy() noexcept
     {
-      delete[] slots_;
-      slots_ = nullptr;
+      delete[] slots1_;
+      delete[] slots2_;
+      slots1_ = nullptr;
+      slots2_ = nullptr;
       size_ = 0;
       capacity_ = 0;
     }
@@ -150,13 +165,15 @@ namespace kitserov
     HashCucushka() :
       size_(0),
       capacity_(DEFAULT_CAPACITY),
-      slots_(new Slot[DEFAULT_CAPACITY])
+      slots1_(new Slot[DEFAULT_CAPACITY / 2]),
+      slots2_(new Slot[DEFAULT_CAPACITY / 2])
     {}
 
     explicit HashCucushka(size_t size) :
       size_(0),
       capacity_(normalizeCapacity(size)),
-      slots_(capacity_ == 0 ? nullptr : new Slot[capacity_])
+      slots1_(capacity_ == 0 ? nullptr : new Slot[capacity_ / 2]),
+      slots2_(capacity_ == 0 ? nullptr : new Slot[capacity_ / 2])
     {}
 
     HashCucushka(const HashCucushka& other) :
@@ -165,11 +182,14 @@ namespace kitserov
       hash2_(other.hash2_),
       size_(other.size_),
       capacity_(other.capacity_),
-      slots_(capacity_ == 0 ? nullptr : new Slot[capacity_])
+      slots1_(capacity_ == 0 ? nullptr : new Slot[capacity_ / 2]),
+      slots2_(capacity_ == 0 ? nullptr : new Slot[capacity_ / 2])
     {
-      for (size_t i = 0; i < capacity_; ++i)
+      size_t half = halfCapacity(capacity_);
+      for (size_t i = 0; i < half; ++i)
       {
-        slots_[i] = other.slots_[i];
+        slots1_[i] = other.slots1_[i];
+        slots2_[i] = other.slots2_[i];
       }
     }
 
@@ -179,11 +199,13 @@ namespace kitserov
       hash2_(std::move(other.hash2_)),
       size_(other.size_),
       capacity_(other.capacity_),
-      slots_(other.slots_)
+      slots1_(other.slots1_),
+      slots2_(other.slots2_)
     {
       other.size_ = 0;
       other.capacity_ = 0;
-      other.slots_ = nullptr;
+      other.slots1_ = nullptr;
+      other.slots2_ = nullptr;
     }
 
     ~HashCucushka()
@@ -236,19 +258,30 @@ namespace kitserov
       swap(hash2_, other.hash2_);
       swap(size_, other.size_);
       swap(capacity_, other.capacity_);
-      swap(slots_, other.slots_);
+      swap(slots1_, other.slots1_);
+      swap(slots2_, other.slots2_);
     }
 
     Value* find(const Key& key) noexcept
     {
       size_t index = findIndex(key);
-      return index == capacity_ ? nullptr : &slots_[index].val_;
+      if (index == capacity_)
+      {
+        return nullptr;
+      }
+      size_t half = halfCapacity(capacity_);
+      return index < half ? &slots1_[index].val_ : &slots2_[index - half].val_;
     }
 
     const Value* find(const Key& key) const noexcept
     {
       size_t index = findIndex(key);
-      return index == capacity_ ? nullptr : &slots_[index].val_;
+      if (index == capacity_)
+      {
+        return nullptr;
+      }
+      size_t half = halfCapacity(capacity_);
+      return index < half ? &slots1_[index].val_ : &slots2_[index - half].val_;
     }
 
     bool contains(const Key& key) const
@@ -272,22 +305,28 @@ namespace kitserov
 
       while (true)
       {
-        Slot* candidate = new Slot[capacity_];
-        for (size_t i = 0; i < capacity_; ++i)
+        Slot* candidate1 = new Slot[capacity_ / 2];
+        Slot* candidate2 = new Slot[capacity_ / 2];
+        size_t half = capacity_ / 2;
+        for (size_t i = 0; i < half; ++i)
         {
-          candidate[i] = slots_[i];
+          candidate1[i] = slots1_[i];
+          candidate2[i] = slots2_[i];
         }
 
         size_t candidateSize = size_;
-        if (insertInto(candidate, capacity_, key, value, candidateSize))
+        if (insertPair(candidate1, candidate2, capacity_, key, value, candidateSize))
         {
-          delete[] slots_;
-          slots_ = candidate;
+          delete[] slots1_;
+          delete[] slots2_;
+          slots1_ = candidate1;
+          slots2_ = candidate2;
           size_ = candidateSize;
           return true;
         }
 
-        delete[] candidate;
+        delete[] candidate1;
+        delete[] candidate2;
         rehash(capacity_ == 0 ? DEFAULT_CAPACITY : capacity_ * 2 + 1);
       }
     }
@@ -320,7 +359,15 @@ namespace kitserov
         return false;
       }
 
-      slots_[index].state_ = State::TOMBSTONE;
+      size_t half = halfCapacity(capacity_);
+      if (index < half)
+      {
+        slots1_[index].state_ = State::TOMBSTONE;
+      }
+      else
+      {
+        slots2_[index - half].state_ = State::TOMBSTONE;
+      }
       --size_;
       return true;
     }
@@ -353,22 +400,33 @@ namespace kitserov
         return;
       }
 
-      Slot* oldSlots = slots_;
+      Slot* oldSlots1 = slots1_;
+      Slot* oldSlots2 = slots2_;
       size_t oldCapacity = capacity_;
       size_t targetCapacity = newCapacity;
 
       while (true)
       {
-        Slot* newSlots = new Slot[targetCapacity];
+        Slot* newSlots1 = new Slot[targetCapacity / 2];
+        Slot* newSlots2 = new Slot[targetCapacity / 2];
         size_t newSize = 0;
         bool ok = true;
+        size_t half = oldCapacity / 2;
 
-        for (size_t i = 0; i < oldCapacity; ++i)
+        for (size_t i = 0; i < half; ++i)
         {
-          const Slot& slot = oldSlots[i];
-          if (slot.state_ == State::OCCUPIED)
+          if (oldSlots1[i].state_ == State::OCCUPIED)
           {
-            if (!insertInto(newSlots, targetCapacity, slot.key_, slot.val_, newSize))
+            if (!insertPair(newSlots1, newSlots2, targetCapacity, oldSlots1[i].key_, oldSlots1[i].val_, newSize))
+            {
+              ok = false;
+              break;
+            }
+          }
+
+          if (ok && oldSlots2[i].state_ == State::OCCUPIED)
+          {
+            if (!insertPair(newSlots1, newSlots2, targetCapacity, oldSlots2[i].key_, oldSlots2[i].val_, newSize))
             {
               ok = false;
               break;
@@ -378,14 +436,17 @@ namespace kitserov
 
         if (ok)
         {
-          delete[] slots_;
-          slots_ = newSlots;
+          delete[] slots1_;
+          delete[] slots2_;
+          slots1_ = newSlots1;
+          slots2_ = newSlots2;
           size_ = newSize;
           capacity_ = targetCapacity;
           return;
         }
 
-        delete[] newSlots;
+        delete[] newSlots1;
+        delete[] newSlots2;
         targetCapacity = normalizeCapacity(targetCapacity * 2 + 1);
       }
     }
@@ -406,17 +467,17 @@ namespace kitserov
 
       Value& operator*() const
       {
-        return table_->slots_[idx_].val_;
+        return table_->slotAt(idx_).val_;
       }
 
       Value* operator->() const
       {
-        return &(table_->slots_[idx_].val_);
+        return &(table_->slotAt(idx_).val_);
       }
 
       const Key& key() const noexcept
       {
-        return table_->slots_[idx_].key_;
+        return table_->slotAt(idx_).key_;
       }
 
       iterator& operator++() noexcept
@@ -427,7 +488,7 @@ namespace kitserov
         }
 
         ++idx_;
-        while (idx_ < table_->capacity_ && table_->slots_[idx_].state_ != State::OCCUPIED)
+        while (idx_ < table_->capacity_ && table_->slotAt(idx_).state_ != State::OCCUPIED)
         {
           ++idx_;
         }
@@ -483,17 +544,17 @@ namespace kitserov
 
       const Value& operator*() const
       {
-        return table_->slots_[idx_].val_;
+        return table_->slotAt(idx_).val_;
       }
 
       const Value* operator->() const
       {
-        return &(table_->slots_[idx_].val_);
+        return &(table_->slotAt(idx_).val_);
       }
 
       const Key& key() const noexcept
       {
-        return table_->slots_[idx_].key_;
+        return table_->slotAt(idx_).key_;
       }
 
       const_iterator& operator++() noexcept
@@ -504,7 +565,7 @@ namespace kitserov
         }
 
         ++idx_;
-        while (idx_ < table_->capacity_ && table_->slots_[idx_].state_ != State::OCCUPIED)
+        while (idx_ < table_->capacity_ && table_->slotAt(idx_).state_ != State::OCCUPIED)
         {
           ++idx_;
         }
@@ -543,7 +604,7 @@ namespace kitserov
     {
       for (size_t i = 0; i < capacity_; ++i)
       {
-        if (slots_[i].state_ == State::OCCUPIED)
+        if (slotAt(i).state_ == State::OCCUPIED)
         {
           return iterator(this, i);
         }
@@ -560,7 +621,7 @@ namespace kitserov
     {
       for (size_t i = 0; i < capacity_; ++i)
       {
-        if (slots_[i].state_ == State::OCCUPIED)
+        if (slotAt(i).state_ == State::OCCUPIED)
         {
           return const_iterator(this, i);
         }
