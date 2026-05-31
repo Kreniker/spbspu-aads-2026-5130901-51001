@@ -7,7 +7,7 @@
 int main()
 {
   using namespace kitserov;
-  using CommandHandler = void (*)(std::ostream& out, std::istream& in, Hash&);
+  using CommandHandler = void (*)(std::ostream& out, std::istream& in, Matrix& inventory);
   HashCucushka< std::string, CommandHandler,
     IdentityHash, IdentityHash, std::equal_to< std::string > > cmds(20);
   std::string cmd;
