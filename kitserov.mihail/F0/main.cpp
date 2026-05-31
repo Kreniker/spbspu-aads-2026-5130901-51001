@@ -1,6 +1,7 @@
 #include "hash-cucushka.hpp"
 #include "identity-hash.hpp"
 #include "item.hpp"
+#include "utils.hpp"
 #include <string>
 #include <iostream>
 #include <functional>
@@ -15,7 +16,8 @@ int main()
   HashCucushka< std::string, CommandHandler,
     std::hash< std::string >, std::hash< std::string >,
     std::equal_to< std::string > > cmds(20);
-
+  cmds.add("define-item", define_item);
+  cmds.add("list-items", list_items);
   ItemTable items(20);
   CollectionTable collections(20);
   Inventory inventory;
