@@ -1,19 +1,9 @@
 #include <utility>
 #include <boost/test/unit_test.hpp>
 #include "hash-cucushka.hpp"
+#include "identity-hash.hpp"
 
 using namespace kitserov;
-
-namespace
-{
-  struct IdentityHash
-  {
-    size_t operator()(int key) const
-    {
-      return static_cast< size_t >(key);
-    }
-  };
-}
 
 BOOST_AUTO_TEST_CASE(hash_start_empty)
 {
