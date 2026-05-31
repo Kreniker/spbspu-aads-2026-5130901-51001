@@ -33,9 +33,9 @@ int main()
       (*handler)(std::cout, std::cin, items, collections, inventory);
       std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-      std::cout << "<INVALID COMMAND>\n";
+      std::cout << "Error: " << e.what() << '\n';
       std::cin.clear();
       std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     }
