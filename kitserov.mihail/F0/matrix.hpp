@@ -247,7 +247,7 @@ namespace kitserov
           {
             out << ' ';
           }
-          out << matrix(row, col);
+          out << "[" << matrix(row, col) << "]";
         }
         if (row + 1 < matrix.rows_)
         {
