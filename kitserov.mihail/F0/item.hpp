@@ -84,6 +84,9 @@ namespace kitserov
     std::hash< std::string >, std::hash< std::string >,
     std::equal_to< std::string > >;
   using Inventory = Matrix< Item >;
+   using InventoryTable = HashCucushka< std::string, Inventory,
+     std::hash< std::string >, std::hash< std::string >,
+     std::equal_to< std::string > >;
   using ItemTable = HashCucushka< std::string, Item,
     std::hash< std::string >, std::hash< std::string >,
     std::equal_to< std::string > >;
