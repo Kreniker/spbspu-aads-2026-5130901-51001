@@ -18,6 +18,9 @@ int main()
     std::equal_to< std::string > > cmds(20);
   cmds.add("define-item", define_item);
   cmds.add("list-items", list_items);
+  cmds.add("create-collection", create_collection);
+  cmds.add("add", add);
+  cmds.add("show-collection", show_collection);
   ItemTable items(20);
   CollectionTable collections(20);
   Inventory inventory;

@@ -80,7 +80,9 @@ namespace kitserov
     }
   };
 
-  using ItemCollection = Vector< Item >;
+  using ItemCollection = HashCucushka< std::string, size_t,
+    std::hash< std::string >, std::hash< std::string >,
+    std::equal_to< std::string > >;
   using Inventory = Matrix< Item >;
   using ItemTable = HashCucushka< std::string, Item,
     std::hash< std::string >, std::hash< std::string >,
