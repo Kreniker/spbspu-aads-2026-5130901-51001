@@ -4,6 +4,7 @@
 #include "item.hpp"
 
 #include <algorithm>
+#include <fstream>
 #include <istream>
 #include <ostream>
 #include <string>
@@ -11,6 +12,8 @@
 
 namespace
 {
+  const char* const EMPTY_CELL = "-";
+
   bool can_place(const kitserov::Inventory& inventory, const kitserov::Item& item,
     size_t row, size_t col, bool rotated)
   {
@@ -123,6 +126,171 @@ namespace
     }
 
     return target;
+  }
+
+  void writeItemSection(std::ostream& out, const kitserov::ItemTable& items)
+  {
+    std::vector< const kitserov::Item* > sorted;
+    for (auto it = items.begin(); it != items.end(); ++it)
+    {
+      sorted.push_back(&(*it));
+    }
+
+    std::sort(sorted.begin(), sorted.end(), [](const kitserov::Item* lhs, const kitserov::Item* rhs)
+    {
+      return lhs->id() < rhs->id();
+    });
+
+    out << sorted.size() << '\n';
+    for (const kitserov::Item* item : sorted)
+    {
+      out << item->id() << ' ' << item->name() << ' ' << item->width() << ' '
+        << item->height() << ' ' << item->value() << '\n';
+    }
+  }
+
+  void writeCollectionSection(std::ostream& out, const kitserov::CollectionTable& collections)
+  {
+    std::vector< std::pair< std::string, const kitserov::ItemCollection* > > sorted;
+    for (auto it = collections.begin(); it != collections.end(); ++it)
+    {
+      sorted.push_back({it.key(), &(*it)});
+    }
+
+    std::sort(sorted.begin(), sorted.end(), [](const std::pair< std::string, const kitserov::ItemCollection* >& lhs,
+      const std::pair< std::string, const kitserov::ItemCollection* >& rhs)
+    {
+      return lhs.first < rhs.first;
+    });
+
+    out << sorted.size() << '\n';
+    for (const auto& entry : sorted)
+    {
+      out << entry.first << ' ' << entry.second->size();
+      for (auto it = entry.second->begin(); it != entry.second->end(); ++it)
+      {
+        out << ' ' << it.key() << ' ' << *it;
+      }
+      out << '\n';
+    }
+  }
+
+  void writeInventorySection(std::ostream& out, const kitserov::InventoryTable& inventories)
+  {
+    std::vector< std::pair< std::string, const kitserov::Inventory* > > sorted;
+    for (auto it = inventories.begin(); it != inventories.end(); ++it)
+    {
+      sorted.push_back({it.key(), &(*it)});
+    }
+
+    std::sort(sorted.begin(), sorted.end(), [](const std::pair< std::string, const kitserov::Inventory* >& lhs,
+      const std::pair< std::string, const kitserov::Inventory* >& rhs)
+    {
+      return lhs.first < rhs.first;
+    });
+
+    out << sorted.size() << '\n';
+    for (const auto& entry : sorted)
+    {
+      const kitserov::Inventory& inventory = *entry.second;
+      out << entry.first << ' ' << inventory.rows() << ' ' << inventory.cols() << '\n';
+      for (size_t row = 0; row < inventory.rows(); ++row)
+      {
+        for (size_t col = 0; col < inventory.cols(); ++col)
+        {
+          if (col != 0)
+          {
+            out << ' ';
+          }
+          const std::string& id = inventory(row, col).id();
+          out << (id.empty() ? EMPTY_CELL : id);
+        }
+        out << '\n';
+      }
+    }
+  }
+
+  bool readItemSection(std::istream& in, kitserov::ItemTable& items)
+  {
+    size_t count = 0;
+    if (!(in >> count))
+    {
+      return false;
+    }
+
+    for (size_t index = 0; index < count; ++index)
+    {
+      std::string id;
+      std::string name;
+      size_t width = 0;
+      size_t height = 0;
+      size_t value = 0;
+      in >> id >> name >> width >> height >> value;
+      items.add(id, kitserov::Item(id, name, value, width, height, items));
+    }
+
+    return true;
+  }
+
+  bool readCollectionSection(std::istream& in, kitserov::CollectionTable& collections)
+  {
+    size_t count = 0;
+    in >> count;
+    for (size_t index = 0; index < count; ++index)
+    {
+      std::string name;
+      size_t itemCount = 0;
+      in >> name >> itemCount;
+      kitserov::ItemCollection collection(20);
+      for (size_t itemIndex = 0; itemIndex < itemCount; ++itemIndex)
+      {
+        std::string itemId;
+        size_t amount = 0;
+        in >> itemId >> amount;
+        collection.add(itemId, amount);
+      }
+      collections.add(name, collection);
+    }
+
+    return true;
+  }
+
+  bool readInventorySection(std::istream& in, kitserov::InventoryTable& inventories,
+    const kitserov::ItemTable& items)
+  {
+    size_t count = 0;
+    in >> count;
+    for (size_t index = 0; index < count; ++index)
+    {
+      std::string name;
+      size_t rows = 0;
+      size_t cols = 0;
+      in >> name >> rows >> cols;
+
+      kitserov::Inventory inventory(rows, cols);
+      for (size_t row = 0; row < rows; ++row)
+      {
+        for (size_t col = 0; col < cols; ++col)
+        {
+          std::string itemId;
+          in >> itemId;
+          if (itemId == EMPTY_CELL)
+          {
+            continue;
+          }
+
+          const kitserov::Item* item = items.find(itemId);
+          if (item != nullptr)
+          {
+            inventory(row, col) = *item;
+          }
+        }
+      }
+
+      inventories.add(name, inventory);
+    }
+
+    return true;
   }
 }
 
@@ -374,6 +542,59 @@ inline void place(std::ostream& out, std::istream& in, ItemTable& items,
   }
 
   throw std::invalid_argument("There is not enough space in the inventory.");
+}
+
+inline void save(std::ostream& out, std::istream& in, ItemTable& items,
+  CollectionTable& collections, InventoryTable& inventories)
+{
+  std::string fileName;
+  in >> fileName;
+
+  std::ofstream file(fileName);
+  if (!file)
+  {
+    throw std::invalid_argument("cannot open file");
+  }
+
+  writeItemSection(file, items);
+  writeCollectionSection(file, collections);
+  writeInventorySection(file, inventories);
+  out << "OK\n";
+}
+
+inline void load(std::ostream& out, std::istream& in, ItemTable& items,
+  CollectionTable& collections, InventoryTable& inventories)
+{
+  std::string fileName;
+  in >> fileName;
+
+  std::ifstream file(fileName);
+  if (!file)
+  {
+    throw std::invalid_argument("cannot open file");
+  }
+
+  ItemTable loadedItems(items.capacity());
+  CollectionTable loadedCollections(collections.capacity());
+  InventoryTable loadedInventories(inventories.capacity());
+
+  if (!readItemSection(file, loadedItems))
+  {
+    throw std::invalid_argument("cannot read file");
+  }
+  if (!readCollectionSection(file, loadedCollections))
+  {
+    throw std::invalid_argument("cannot read file");
+  }
+  if (!readInventorySection(file, loadedInventories, loadedItems))
+  {
+    throw std::invalid_argument("cannot read file");
+  }
+
+  items = loadedItems;
+  collections = loadedCollections;
+  inventories = loadedInventories;
+  out << "OK\n";
 }
 
 #endif

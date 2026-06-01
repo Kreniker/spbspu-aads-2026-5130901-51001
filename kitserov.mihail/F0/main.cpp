@@ -30,6 +30,8 @@ int main()
   cmds.add("show-inv", show_inv);
   cmds.add("show_inv", show_inv);
   cmds.add("place", place);
+  cmds.add("save", save);
+  cmds.add("load", load);
   ItemTable items(20);
   CollectionTable collections(20);
   InventoryTable inventories(20);
@@ -37,6 +39,11 @@ int main()
   std::string cmd;
   while (std::cin >> cmd)
   {
+    if (cmd == "exit" || cmd == "quit")
+    {
+      std::cout << "Bye!\n";
+      break;
+    }
     try
     {
       auto handler = cmds.find(cmd);
