@@ -13,7 +13,14 @@ namespace kitserov
 {
   namespace inventory_detail
   {
-    inline bool can_place(const Inventory& inventory, const Item& item, size_t row, size_t col, bool rotated)
+    struct PackingResult
+    {
+      size_t value_ = 0;
+      Inventory inventory_;
+    };
+
+    inline bool can_place(const Inventory& inventory, const Item& item,
+      size_t row, size_t col, bool rotated)
     {
       size_t itemRows = rotated ? item.width() : item.height();
       size_t itemCols = rotated ? item.height() : item.width();
@@ -37,7 +44,8 @@ namespace kitserov
       return true;
     }
 
-    inline void place_item(Inventory& inventory, const Item& item, size_t row, size_t col, bool rotated)
+    inline void place_item(Inventory& inventory, const Item& item,
+      size_t row, size_t col, bool rotated)
     {
       size_t itemRows = rotated ? item.width() : item.height();
       size_t itemCols = rotated ? item.height() : item.width();
@@ -51,33 +59,137 @@ namespace kitserov
       }
     }
 
-    inline bool place_at_first_fit(Inventory& inventory, const Item& item)
+    inline std::string occupancy_key(const Inventory& inventory)
     {
+      std::string key;
+      key.reserve(inventory.rows() * inventory.cols());
       for (size_t row = 0; row < inventory.rows(); ++row)
       {
         for (size_t col = 0; col < inventory.cols(); ++col)
         {
-          if (can_place(inventory, item, row, col, false))
+          key.push_back(inventory(row, col).id().empty() ? '0' : '1');
+        }
+      }
+      return key;
+    }
+
+    inline std::vector< const Item* > sort_items_by_value(std::vector< const Item* > items)
+    {
+      std::sort(items.begin(), items.end(), [](const Item* lhs, const Item* rhs)
+      {
+        if (lhs->value() != rhs->value())
+        {
+          return lhs->value() > rhs->value();
+        }
+
+        size_t lhsArea = lhs->width() * lhs->height();
+        size_t rhsArea = rhs->width() * rhs->height();
+        if (lhsArea != rhsArea)
+        {
+          return lhsArea > rhsArea;
+        }
+
+        return lhs->id() < rhs->id();
+      });
+      return items;
+    }
+
+    using SeenTable = HashCucushka< std::string, size_t,
+      std::hash< std::string >, std::hash< std::string >, std::equal_to< std::string > >;
+    using CountTable = HashCucushka< std::string, std::pair< const Item*, size_t >,
+      std::hash< std::string >, std::hash< std::string >, std::equal_to< std::string > >;
+
+    inline void maximize_packing(const std::vector< const Item* >& items, size_t index,
+      const std::vector< size_t >& suffixValue, Inventory& current, size_t currentValue,
+      PackingResult& best, SeenTable& seen)
+    {
+      if (currentValue + suffixValue[index] <= best.value_)
+      {
+        return;
+      }
+
+      std::string key = std::to_string(index) + ':' + occupancy_key(current);
+      size_t* position = seen.find(key);
+      if (position != nullptr && *position >= currentValue)
+      {
+        return;
+      }
+      if (position == nullptr)
+      {
+        seen.add(key, currentValue);
+      }
+      else
+      {
+        *position = currentValue;
+      }
+
+      if (index == items.size())
+      {
+        if (currentValue > best.value_)
+        {
+          best.value_ = currentValue;
+          best.inventory_ = current;
+        }
+        return;
+      }
+
+      const Item* item = items[index];
+
+      maximize_packing(items, index + 1, suffixValue, current, currentValue, best, seen);
+
+      for (size_t row = 0; row < current.rows(); ++row)
+      {
+        for (size_t col = 0; col < current.cols(); ++col)
+        {
+          if (can_place(current, *item, row, col, false))
           {
-            place_item(inventory, item, row, col, false);
-            return true;
+            Inventory next = current;
+            place_item(next, *item, row, col, false);
+            maximize_packing(items, index + 1, suffixValue, next,
+              currentValue + item->value(), best, seen);
           }
 
-          if (can_place(inventory, item, row, col, true))
+          if (item->width() != item->height() && can_place(current, *item, row, col, true))
           {
-            place_item(inventory, item, row, col, true);
-            return true;
+            Inventory next = current;
+            place_item(next, *item, row, col, true);
+            maximize_packing(items, index + 1, suffixValue, next,
+              currentValue + item->value(), best, seen);
           }
         }
       }
-
-      return false;
     }
 
-    inline std::vector< const Item* > unique_items_from_inventory(const Inventory& inventory)
+    inline std::vector< const Item* > expand_collection_items(const CollectionTable& collections,
+      const ItemTable& items, const std::string& collectionName)
     {
       std::vector< const Item* > result;
-      std::vector< std::string > seen;
+      const ItemCollection* collection = collections.find(collectionName);
+      if (collection == nullptr)
+      {
+        throw std::invalid_argument("collection " + collectionName + " have not defined");
+      }
+
+      for (auto it = collection->begin(); it != collection->end(); ++it)
+      {
+        const Item* item = items.find(it.key());
+        if (item == nullptr)
+        {
+          throw std::invalid_argument("Item with id " + it.key() + " not defined.");
+        }
+
+        for (size_t count = 0; count < *it; ++count)
+        {
+          result.push_back(item);
+        }
+      }
+
+      return result;
+    }
+
+    inline std::vector< const Item* > expand_inventory_items(const Inventory& inventory)
+    {
+      CountTable counts;
 
       for (size_t row = 0; row < inventory.rows(); ++row)
       {
@@ -89,40 +201,62 @@ namespace kitserov
             continue;
           }
 
-          if (std::find(seen.begin(), seen.end(), cell.id()) != seen.end())
+          std::pair< const Item*, size_t >* entry = counts.find(cell.id());
+          if (entry == nullptr)
           {
+            counts.add(cell.id(), std::make_pair(&cell, size_t(1)));
             continue;
           }
+          ++entry->second;
+        }
+      }
 
-          seen.push_back(cell.id());
-          result.push_back(&cell);
+      std::vector< const Item* > result;
+      for (auto it = counts.begin(); it != counts.end(); ++it)
+      {
+        const Item* item = it->first;
+        size_t area = item->width() * item->height();
+        size_t copies = area == 0 ? 0 : it->second / area;
+        for (size_t index = 0; index < copies; ++index)
+        {
+          result.push_back(item);
         }
       }
 
       return result;
     }
 
+    inline Inventory pack_best(const Inventory& base, std::vector< const Item* > items)
+    {
+      Inventory current = base;
+      items = sort_items_by_value(std::move(items));
+
+      std::vector< size_t > suffixValue(items.size() + 1, 0);
+      for (size_t index = items.size(); index > 0; --index)
+      {
+        suffixValue[index - 1] = suffixValue[index] + items[index - 1]->value();
+      }
+
+      PackingResult best;
+      best.inventory_ = base;
+      SeenTable seen;
+      maximize_packing(items, 0, suffixValue, current, 0, best, seen);
+      return best.inventory_;
+    }
+
     inline Inventory repack_inventory(const Inventory& source, size_t rows, size_t cols)
     {
       Inventory target(rows, cols);
-      std::vector< const Item* > items = unique_items_from_inventory(source);
+      std::vector< const Item* > items = expand_inventory_items(source);
+      return pack_best(target, std::move(items));
+    }
 
-      std::sort(items.begin(), items.end(), [](const Item* lhs, const Item* rhs)
-      {
-        if (lhs->value() != rhs->value())
-        {
-          return lhs->value() > rhs->value();
-        }
-
-        return lhs->id() < rhs->id();
-      });
-
-      for (const Item* item : items)
-      {
-        (void) place_at_first_fit(target, *item);
-      }
-
-      return target;
+    inline Inventory place_collection_into_inventory(const Inventory& inventory,
+      const CollectionTable& collections, const ItemTable& items,
+      const std::string& collectionName)
+    {
+      std::vector< const Item* > itemCopies = expand_collection_items(collections, items, collectionName);
+      return pack_best(inventory, std::move(itemCopies));
     }
   }
 }
@@ -134,22 +268,22 @@ inline void create_inv(std::ostream& out, std::istream& in, kitserov::ItemTable&
   (void) collections;
 
   std::string invName;
-  size_t rows = 0;
-  size_t cols = 0;
-  in >> invName >> rows >> cols;
+  size_t width = 0;
+  size_t height = 0;
+  in >> invName >> width >> height;
 
   if (inventories.contains(invName))
   {
     kitserov::Inventory* existing = inventories.find(invName);
     if (existing != nullptr)
     {
-      *existing = kitserov::inventory_detail::repack_inventory(*existing, rows, cols);
+      *existing = kitserov::inventory_detail::repack_inventory(*existing, height, width);
       out << "OK\n";
       return;
     }
   }
 
-  inventories.add(invName, kitserov::Inventory(rows, cols));
+  inventories.add(invName, kitserov::Inventory(height, width));
   out << "OK\n";
 }
 
@@ -222,6 +356,29 @@ inline void place(std::ostream& out, std::istream& in, kitserov::ItemTable& item
   }
 
   throw std::invalid_argument("There is not enough space in the inventory.");
+}
+
+inline void place_collection(std::ostream& out, std::istream& in, kitserov::ItemTable& items,
+  kitserov::CollectionTable& collections, kitserov::InventoryTable& inventories)
+{
+  std::string invName;
+  std::string collectionName;
+  in >> invName >> collectionName;
+
+  kitserov::Inventory* inventory = inventories.find(invName);
+  if (inventory == nullptr)
+  {
+    throw std::invalid_argument("Inventory " + invName + " have not defined");
+  }
+
+  if (!collections.contains(collectionName))
+  {
+    throw std::invalid_argument("collection " + collectionName + " have not defined");
+  }
+
+  *inventory = kitserov::inventory_detail::place_collection_into_inventory(
+    *inventory, collections, items, collectionName);
+  out << "OK\n";
 }
 
 #endif

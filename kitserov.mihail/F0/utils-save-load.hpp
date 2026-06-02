@@ -13,26 +13,6 @@
 
 namespace kitserov
 {
-  void help(std::ostream& out, std::istream&, ItemTable&,
-    CollectionTable&, InventoryTable&)
-  {
-    out << "Available commands:\n"
-      << "  define-item <id> <name> <width> <height> <value>\n"
-      << "  list-items\n"
-      << "  create-collection <collection_name>\n"
-      << "  add <collection_name> <item_id> <amount>\n"
-      << "  show-collection <collection_name>\n"
-      << "  create-inv <inventory_name> <rows> <cols>\n"
-      << "  show-inv <inventory_name>\n"
-      << "  place <inventory_name> <item_id> <x> <y>\n"
-      << "  place-collection <inventory_name> <collection_name>\n"
-      << "  remove <collection_name> <item_id>  <count>\n"
-      << "  find-space <inv_name> <item_id>\n"
-      << "  organize <inv_name>\n"
-      << "  clear <inv_name>\n"
-      << "  save <file_name>\n"
-      << "  load <file_name>\n";
-  }
   namespace persistence_detail
   {
     inline void writeItemSection(std::ostream& out, const ItemTable& items)
@@ -200,59 +180,59 @@ namespace kitserov
       return true;
     }
   }
+
+
+  inline void save(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    std::string fileName;
+    in >> fileName;
+
+    std::ofstream file(fileName);
+    if (!file)
+    {
+      throw std::invalid_argument("cannot open file");
+    }
+
+    persistence_detail::writeItemSection(file, items);
+    persistence_detail::writeCollectionSection(file, collections);
+    persistence_detail::writeInventorySection(file, inventories);
+    out << "OK\n";
+  }
+
+  inline void load(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    std::string fileName;
+    in >> fileName;
+
+    std::ifstream file(fileName);
+    if (!file)
+    {
+      throw std::invalid_argument("cannot open file");
+    }
+
+    ItemTable loadedItems(items.capacity());
+    CollectionTable loadedCollections(collections.capacity());
+    InventoryTable loadedInventories(inventories.capacity());
+
+    if (!persistence_detail::readItemSection(file, loadedItems))
+    {
+      throw std::invalid_argument("cannot read file");
+    }
+    if (!persistence_detail::readCollectionSection(file, loadedCollections))
+    {
+      throw std::invalid_argument("cannot read file");
+    }
+    if (!persistence_detail::readInventorySection(file, loadedInventories, loadedItems))
+    {
+      throw std::invalid_argument("cannot read file");
+    }
+
+    items = loadedItems;
+    collections = loadedCollections;
+    inventories = loadedInventories;
+    out << "OK\n";
+  }
 }
-
-inline void save(std::ostream& out, std::istream& in, kitserov::ItemTable& items,
-  kitserov::CollectionTable& collections, kitserov::InventoryTable& inventories)
-{
-  std::string fileName;
-  in >> fileName;
-
-  std::ofstream file(fileName);
-  if (!file)
-  {
-    throw std::invalid_argument("cannot open file");
-  }
-
-  kitserov::persistence_detail::writeItemSection(file, items);
-  kitserov::persistence_detail::writeCollectionSection(file, collections);
-  kitserov::persistence_detail::writeInventorySection(file, inventories);
-  out << "OK\n";
-}
-
-inline void load(std::ostream& out, std::istream& in, kitserov::ItemTable& items,
-  kitserov::CollectionTable& collections, kitserov::InventoryTable& inventories)
-{
-  std::string fileName;
-  in >> fileName;
-
-  std::ifstream file(fileName);
-  if (!file)
-  {
-    throw std::invalid_argument("cannot open file");
-  }
-
-  kitserov::ItemTable loadedItems(items.capacity());
-  kitserov::CollectionTable loadedCollections(collections.capacity());
-  kitserov::InventoryTable loadedInventories(inventories.capacity());
-
-  if (!kitserov::persistence_detail::readItemSection(file, loadedItems))
-  {
-    throw std::invalid_argument("cannot read file");
-  }
-  if (!kitserov::persistence_detail::readCollectionSection(file, loadedCollections))
-  {
-    throw std::invalid_argument("cannot read file");
-  }
-  if (!kitserov::persistence_detail::readInventorySection(file, loadedInventories, loadedItems))
-  {
-    throw std::invalid_argument("cannot read file");
-  }
-
-  items = loadedItems;
-  collections = loadedCollections;
-  inventories = loadedInventories;
-  out << "OK\n";
-}
-
 #endif

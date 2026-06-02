@@ -30,6 +30,9 @@ int main()
   cmds.add("show-inv", show_inv);
   cmds.add("show_inv", show_inv);
   cmds.add("place", place);
+  cmds.add("place-collection", place_collection);
+  cmds.add("place_collection", place_collection);
+  cmds.add("help", help);
   cmds.add("save", save);
   cmds.add("load", load);
   ItemTable items(20);
