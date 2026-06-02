@@ -7,7 +7,6 @@
 #include <istream>
 #include <ostream>
 #include <string>
-#include <vector>
 
 namespace kitserov
 {

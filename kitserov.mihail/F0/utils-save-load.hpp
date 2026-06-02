@@ -2,6 +2,7 @@
 #define UTILS_SAVE_LOAD_HPP
 
 #include "item.hpp"
+#include "matrix.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -9,7 +10,6 @@
 #include <ostream>
 #include <string>
 #include <utility>
-#include <vector>
 
 namespace kitserov
 {
@@ -17,10 +17,10 @@ namespace kitserov
   {
     inline void writeItemSection(std::ostream& out, const ItemTable& items)
     {
-      std::vector< const Item* > sorted;
+      Vector< const Item* > sorted;
       for (auto it = items.begin(); it != items.end(); ++it)
       {
-        sorted.push_back(&(*it));
+        sorted.pushBack(&(*it));
       }
 
       std::sort(sorted.begin(), sorted.end(), [](const Item* lhs, const Item* rhs)
@@ -38,10 +38,10 @@ namespace kitserov
 
     inline void writeCollectionSection(std::ostream& out, const CollectionTable& collections)
     {
-      std::vector< std::pair< std::string, const ItemCollection* > > sorted;
+      Vector< std::pair< std::string, const ItemCollection* > > sorted;
       for (auto it = collections.begin(); it != collections.end(); ++it)
       {
-        sorted.push_back({it.key(), &(*it)});
+        sorted.pushBack({it.key(), &(*it)});
       }
 
       std::sort(sorted.begin(), sorted.end(), [](const std::pair< std::string, const ItemCollection* >& lhs,
@@ -64,10 +64,10 @@ namespace kitserov
 
     inline void writeInventorySection(std::ostream& out, const InventoryTable& inventories)
     {
-      std::vector< std::pair< std::string, const Inventory* > > sorted;
+      Vector< std::pair< std::string, const Inventory* > > sorted;
       for (auto it = inventories.begin(); it != inventories.end(); ++it)
       {
-        sorted.push_back({it.key(), &(*it)});
+        sorted.pushBack({it.key(), &(*it)});
       }
 
       std::sort(sorted.begin(), sorted.end(), [](const std::pair< std::string, const Inventory* >& lhs,

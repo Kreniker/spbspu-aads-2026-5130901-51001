@@ -7,7 +7,6 @@
 #include <istream>
 #include <ostream>
 #include <string>
-#include <vector>
 
 namespace kitserov
 {
@@ -73,7 +72,7 @@ namespace kitserov
       return key;
     }
 
-    inline std::vector< const Item* > sort_items_by_value(std::vector< const Item* > items)
+    inline Vector< const Item* > sort_items_by_value(Vector< const Item* > items)
     {
       std::sort(items.begin(), items.end(), [](const Item* lhs, const Item* rhs)
       {
@@ -99,8 +98,8 @@ namespace kitserov
     using CountTable = HashCucushka< std::string, std::pair< const Item*, size_t >,
       std::hash< std::string >, std::hash< std::string >, std::equal_to< std::string > >;
 
-    inline void maximize_packing(const std::vector< const Item* >& items, size_t index,
-      const std::vector< size_t >& suffixValue, Inventory& current, size_t currentValue,
+    inline void maximize_packing(const Vector< const Item* >& items, size_t index,
+      const Vector< size_t >& suffixValue, Inventory& current, size_t currentValue,
       PackingResult& best, SeenTable& seen)
     {
       if (currentValue + suffixValue[index] <= best.value_)
@@ -160,10 +159,10 @@ namespace kitserov
       }
     }
 
-    inline std::vector< const Item* > expand_collection_items(const CollectionTable& collections,
+    inline Vector< const Item* > expand_collection_items(const CollectionTable& collections,
       const ItemTable& items, const std::string& collectionName)
     {
-      std::vector< const Item* > result;
+      Vector< const Item* > result;
       const ItemCollection* collection = collections.find(collectionName);
       if (collection == nullptr)
       {
@@ -180,14 +179,14 @@ namespace kitserov
 
         for (size_t count = 0; count < *it; ++count)
         {
-          result.push_back(item);
+          result.pushBack(item);
         }
       }
 
       return result;
     }
 
-    inline std::vector< const Item* > expand_inventory_items(const Inventory& inventory)
+    inline Vector< const Item* > expand_inventory_items(const Inventory& inventory)
     {
       CountTable counts;
 
@@ -211,7 +210,7 @@ namespace kitserov
         }
       }
 
-      std::vector< const Item* > result;
+      Vector< const Item* > result;
       for (auto it = counts.begin(); it != counts.end(); ++it)
       {
         const Item* item = it->first;
@@ -219,19 +218,19 @@ namespace kitserov
         size_t copies = area == 0 ? 0 : it->second / area;
         for (size_t index = 0; index < copies; ++index)
         {
-          result.push_back(item);
+          result.pushBack(item);
         }
       }
 
       return result;
     }
 
-    inline Inventory pack_best(const Inventory& base, std::vector< const Item* > items)
+    inline Inventory pack_best(const Inventory& base, Vector< const Item* > items)
     {
       Inventory current = base;
       items = sort_items_by_value(std::move(items));
 
-      std::vector< size_t > suffixValue(items.size() + 1, 0);
+      Vector< size_t > suffixValue(items.size() + 1, 0);
       for (size_t index = items.size(); index > 0; --index)
       {
         suffixValue[index - 1] = suffixValue[index] + items[index - 1]->value();
@@ -247,7 +246,7 @@ namespace kitserov
     inline Inventory repack_inventory(const Inventory& source, size_t rows, size_t cols)
     {
       Inventory target(rows, cols);
-      std::vector< const Item* > items = expand_inventory_items(source);
+      Vector< const Item* > items = expand_inventory_items(source);
       return pack_best(target, std::move(items));
     }
 
@@ -255,130 +254,130 @@ namespace kitserov
       const CollectionTable& collections, const ItemTable& items,
       const std::string& collectionName)
     {
-      std::vector< const Item* > itemCopies = expand_collection_items(collections, items, collectionName);
+      Vector< const Item* > itemCopies = expand_collection_items(collections, items, collectionName);
       return pack_best(inventory, std::move(itemCopies));
     }
   }
-}
 
-inline void create_inv(std::ostream& out, std::istream& in, kitserov::ItemTable& items,
-  kitserov::CollectionTable& collections, kitserov::InventoryTable& inventories)
-{
-  (void) items;
-  (void) collections;
 
-  std::string invName;
-  size_t width = 0;
-  size_t height = 0;
-  in >> invName >> width >> height;
-
-  if (inventories.contains(invName))
+  inline void create_inv(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
   {
-    kitserov::Inventory* existing = inventories.find(invName);
-    if (existing != nullptr)
+    (void) items;
+    (void) collections;
+
+    std::string invName;
+    size_t width = 0;
+    size_t height = 0;
+    in >> invName >> width >> height;
+
+    if (inventories.contains(invName))
     {
-      *existing = kitserov::inventory_detail::repack_inventory(*existing, height, width);
+      Inventory* existing = inventories.find(invName);
+      if (existing != nullptr)
+      {
+        *existing = inventory_detail::repack_inventory(*existing, height, width);
+        out << "OK\n";
+        return;
+      }
+    }
+
+    inventories.add(invName, Inventory(height, width));
+    out << "OK\n";
+  }
+
+  inline void show_inv(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    (void) items;
+    (void) collections;
+
+    std::string invName;
+    in >> invName;
+
+    const Inventory* inventory = inventories.find(invName);
+    if (inventory == nullptr)
+    {
+      throw std::invalid_argument("Inventory " + invName + " have not defined");
+    }
+
+    out << *inventory << '\n';
+  }
+
+  inline void place(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    (void) collections;
+
+    std::string invName;
+    std::string itemId;
+    long long x = 0;
+    long long y = 0;
+    in >> invName >> itemId >> x >> y;
+
+    Inventory* inventory = inventories.find(invName);
+    if (inventory == nullptr)
+    {
+      throw std::invalid_argument("Inventory " + invName + " have not defined");
+    }
+
+    const Item* item = items.find(itemId);
+    if (item == nullptr)
+    {
+      throw std::invalid_argument("Item with id " + itemId + " not defined.");
+    }
+
+    if (x < 0 || static_cast< size_t >(x) >= inventory->cols())
+    {
+      throw std::invalid_argument("x is out of range.");
+    }
+
+    if (y < 0 || static_cast< size_t >(y) >= inventory->rows())
+    {
+      throw std::invalid_argument("y is out of range.");
+    }
+
+    size_t rowIndex = static_cast< size_t >(y);
+    size_t colIndex = static_cast< size_t >(x);
+
+    if (inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, false))
+    {
+      inventory_detail::place_item(*inventory, *item, rowIndex, colIndex, false);
       out << "OK\n";
       return;
     }
+
+    if (inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, true))
+    {
+      inventory_detail::place_item(*inventory, *item, rowIndex, colIndex, true);
+      out << "OK\n";
+      return;
+    }
+
+    throw std::invalid_argument("There is not enough space in the inventory.");
   }
 
-  inventories.add(invName, kitserov::Inventory(height, width));
-  out << "OK\n";
-}
-
-inline void show_inv(std::ostream& out, std::istream& in, kitserov::ItemTable& items,
-  kitserov::CollectionTable& collections, kitserov::InventoryTable& inventories)
-{
-  (void) items;
-  (void) collections;
-
-  std::string invName;
-  in >> invName;
-
-  const kitserov::Inventory* inventory = inventories.find(invName);
-  if (inventory == nullptr)
+  inline void place_collection(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
   {
-    throw std::invalid_argument("Inventory " + invName + " have not defined");
-  }
+    std::string invName;
+    std::string collectionName;
+    in >> invName >> collectionName;
 
-  out << *inventory << '\n';
-}
+    Inventory* inventory = inventories.find(invName);
+    if (inventory == nullptr)
+    {
+      throw std::invalid_argument("Inventory " + invName + " have not defined");
+    }
 
-inline void place(std::ostream& out, std::istream& in, kitserov::ItemTable& items,
-  kitserov::CollectionTable& collections, kitserov::InventoryTable& inventories)
-{
-  (void) collections;
+    if (!collections.contains(collectionName))
+    {
+      throw std::invalid_argument("collection " + collectionName + " have not defined");
+    }
 
-  std::string invName;
-  std::string itemId;
-  long long x = 0;
-  long long y = 0;
-  in >> invName >> itemId >> x >> y;
-
-  kitserov::Inventory* inventory = inventories.find(invName);
-  if (inventory == nullptr)
-  {
-    throw std::invalid_argument("Inventory " + invName + " have not defined");
-  }
-
-  const kitserov::Item* item = items.find(itemId);
-  if (item == nullptr)
-  {
-    throw std::invalid_argument("Item with id " + itemId + " not defined.");
-  }
-
-  if (x < 0 || static_cast< size_t >(x) >= inventory->cols())
-  {
-    throw std::invalid_argument("x is out of range.");
-  }
-
-  if (y < 0 || static_cast< size_t >(y) >= inventory->rows())
-  {
-    throw std::invalid_argument("y is out of range.");
-  }
-
-  size_t rowIndex = static_cast< size_t >(y);
-  size_t colIndex = static_cast< size_t >(x);
-
-  if (kitserov::inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, false))
-  {
-    kitserov::inventory_detail::place_item(*inventory, *item, rowIndex, colIndex, false);
+    *inventory = inventory_detail::place_collection_into_inventory(
+      *inventory, collections, items, collectionName);
     out << "OK\n";
-    return;
   }
-
-  if (kitserov::inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, true))
-  {
-    kitserov::inventory_detail::place_item(*inventory, *item, rowIndex, colIndex, true);
-    out << "OK\n";
-    return;
-  }
-
-  throw std::invalid_argument("There is not enough space in the inventory.");
 }
-
-inline void place_collection(std::ostream& out, std::istream& in, kitserov::ItemTable& items,
-  kitserov::CollectionTable& collections, kitserov::InventoryTable& inventories)
-{
-  std::string invName;
-  std::string collectionName;
-  in >> invName >> collectionName;
-
-  kitserov::Inventory* inventory = inventories.find(invName);
-  if (inventory == nullptr)
-  {
-    throw std::invalid_argument("Inventory " + invName + " have not defined");
-  }
-
-  if (!collections.contains(collectionName))
-  {
-    throw std::invalid_argument("collection " + collectionName + " have not defined");
-  }
-
-  *inventory = kitserov::inventory_detail::place_collection_into_inventory(
-    *inventory, collections, items, collectionName);
-  out << "OK\n";
-}
-
 #endif

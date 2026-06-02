@@ -2,12 +2,12 @@
 #define UTILS_ITEMS_COLLECTIONS_HPP
 
 #include "item.hpp"
+#include "matrix.hpp"
 
 #include <algorithm>
 #include <istream>
 #include <ostream>
 #include <string>
-#include <vector>
 
 namespace kitserov
 {
@@ -43,10 +43,10 @@ namespace kitserov
     (void) collections;
     (void) inventories;
 
-    std::vector< const Item* > sorted;
+    kitserov::Vector< const Item* > sorted;
     for (auto it = items.begin(); it != items.end(); ++it)
     {
-      sorted.push_back(&(*it));
+      sorted.pushBack(&(*it));
     }
 
     std::sort(sorted.begin(), sorted.end(), [](const Item* lhs, const Item* rhs)
@@ -137,10 +137,10 @@ namespace kitserov
       throw std::invalid_argument("collection " + collectionName + " have not defined");
     }
 
-    std::vector< std::pair< std::string, size_t > > sorted;
+    kitserov::Vector< std::pair< std::string, size_t > > sorted;
     for (auto it = collection->begin(); it != collection->end(); ++it)
     {
-      sorted.push_back({it.key(), *it});
+      sorted.pushBack({it.key(), *it});
     }
 
     std::sort(sorted.begin(), sorted.end(), [](const std::pair< std::string, size_t >& lhs,

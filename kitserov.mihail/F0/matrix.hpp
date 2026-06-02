@@ -173,6 +173,36 @@ namespace kitserov
       return data_[index];
     }
 
+    T* begin() noexcept
+    {
+      return data_;
+    }
+
+    const T* begin() const noexcept
+    {
+      return data_;
+    }
+
+    const T* cbegin() const noexcept
+    {
+      return data_;
+    }
+
+    T* end() noexcept
+    {
+      return data_ == nullptr ? nullptr : data_ + size_;
+    }
+
+    const T* end() const noexcept
+    {
+      return data_ == nullptr ? nullptr : data_ + size_;
+    }
+
+    const T* cend() const noexcept
+    {
+      return data_ == nullptr ? nullptr : data_ + size_;
+    }
+
     size_t size() const noexcept
     {
       return size_;
