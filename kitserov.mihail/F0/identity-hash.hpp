@@ -1,5 +1,6 @@
 #ifndef IDENTITYHASH_HPP
 #define IDENTITYHASH_HPP
+#include <cstddef>
 namespace kitserov
 {
   struct IdentityHash

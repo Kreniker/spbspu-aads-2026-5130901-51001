@@ -279,7 +279,7 @@ namespace kitserov
         out << "Are you want repack inventory \"" << invName << "\"?\n"
           << "Press Y if yes and ANY another key if no\n";
         std::string answer;
-        if (in >> answer && answer == "Y" || answer == "y") {
+        if (in >> answer && (answer == "Y" || answer == "y")) {
           *existing = inventory_detail::repack_inventory(*existing, height, width);
           out << "OK\n";
         } else {
@@ -408,7 +408,7 @@ namespace kitserov
     out << "Are you want delete this inventory?\n"
       << "Press Y if yes and ANY another key if no\n";
     std::string answer;
-    if (in >> answer && answer == "Y" || answer == "y") {
+    if (in >> answer && (answer == "Y" || answer == "y")) {
       inventory -> clear();
       inventories.erase(invName);
     }
