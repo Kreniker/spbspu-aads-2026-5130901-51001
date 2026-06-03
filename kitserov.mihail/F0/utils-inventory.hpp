@@ -414,5 +414,39 @@ namespace kitserov
     }
     out << "OK\n";
   }
+  inline void find_space(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    (void) collections;
+    std::string invName;
+    std::string itemId;
+    in >> invName >> itemId;
+    Inventory* inventory = inventories.find(invName);
+    if (inventory == nullptr)
+    {
+      throw std::invalid_argument("Inventory " + invName + " have not defined");
+    }
+
+    const Item* item = items.find(itemId);
+    if (item == nullptr)
+    {
+      throw std::invalid_argument("Item with id " + itemId + " not defined.");
+    }
+    for (size_t rowIndex = 0; rowIndex < inventory->rows(); ++rowIndex)
+    {
+      for (size_t colIndex = 0; colIndex < inventory->cols(); ++colIndex)
+      {
+        if (inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, false)
+          || inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, true))
+        {
+          out << "YES\n"
+            << "x:" << colIndex << "\n"
+            << "y:" << rowIndex << "\n";
+          return;
+        }
+      }
+    }
+    out << "NO\n";
+  }
 }
 #endif

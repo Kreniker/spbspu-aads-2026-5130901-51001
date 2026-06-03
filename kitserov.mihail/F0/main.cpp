@@ -35,6 +35,8 @@ int main()
   cmds.add("show-inv", show_inv);
   cmds.add("show_inv", show_inv);
   cmds.add("place", place);
+  cmds.add("find-space", find_space);
+  cmds.add("find_space", find_space);
   cmds.add("place-collection", place_collection);
   cmds.add("place_collection", place_collection);
   cmds.add("clear", clear);
