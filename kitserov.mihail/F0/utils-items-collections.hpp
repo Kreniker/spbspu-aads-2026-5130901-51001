@@ -134,5 +134,33 @@ namespace kitserov
         << " (value = " << entry.second * item->value() << ")\n";
     }
   }
+  inline void remove(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    (void) inventories;
+    (void) items;
+    std::string collectionName, itemId;
+    size_t amount;
+    in >> collectionName >> itemId >> amount;
+    ItemCollection* collection = collections.find(collectionName);
+    if (collection == nullptr)
+    {
+      throw std::invalid_argument("collection " + collectionName + " have not defined");
+    }
+    size_t* existingAmount = collection->find(itemId);
+    if (existingAmount == nullptr)    {
+      throw std::invalid_argument("collection " + collectionName + " have not item with id " + itemId);
+    }
+    if (*existingAmount < amount)
+    {
+      throw std::invalid_argument("collection " + collectionName + " have not enough items with id " + itemId);
+    }
+    *existingAmount -= amount;
+    if (*existingAmount == 0)
+    {
+      collection->erase(itemId);
+    }
+    out << "OK\n";
+  }
 }
 #endif

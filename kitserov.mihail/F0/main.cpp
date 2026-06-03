@@ -25,6 +25,7 @@ int main()
   cmds.add("list-collections", list_collections);
   cmds.add("list_collections", list_collections);
   cmds.add("add", add);
+  cmds.add("remove", remove);
   cmds.add("show-collection", show_collection);
   cmds.add("show_collection", show_collection);
   cmds.add("create-inv", create_inv);

@@ -19,6 +19,7 @@ namespace kitserov
       << "  create-collection <collection_name>\n"
       << "  list-collections\n"
       << "  add <collection_name> <item_id> <amount>\n"
+      << "  remove <collection_name> <item_id>  <count>\n"
       << "  show-collection <collection_name>\n"
       << "  create-inv <inventory_name> <cols> <rows>\n"
       << "  list-inv\n"
