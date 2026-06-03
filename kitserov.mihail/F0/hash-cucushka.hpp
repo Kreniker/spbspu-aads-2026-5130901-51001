@@ -467,28 +467,28 @@ namespace kitserov
 
       Value& operator*() const
       {
-        return table_->slotAt(idx_).val_;
+        return table_ -> slotAt(idx_).val_;
       }
 
-      Value* operator->() const
+      Value* operator -> () const
       {
-        return &(table_->slotAt(idx_).val_);
+        return &(table_ -> slotAt(idx_).val_);
       }
 
       const Key& key() const noexcept
       {
-        return table_->slotAt(idx_).key_;
+        return table_ -> slotAt(idx_).key_;
       }
 
       iterator& operator++() noexcept
       {
-        if (table_ == nullptr || idx_ >= table_->capacity_)
+        if (table_ == nullptr || idx_ >= table_ -> capacity_)
         {
           return *this;
         }
 
         ++idx_;
-        while (idx_ < table_->capacity_ && table_->slotAt(idx_).state_ != State::OCCUPIED)
+        while (idx_ < table_ -> capacity_ && table_ -> slotAt(idx_).state_ != State::OCCUPIED)
         {
           ++idx_;
         }
@@ -544,28 +544,28 @@ namespace kitserov
 
       const Value& operator*() const
       {
-        return table_->slotAt(idx_).val_;
+        return table_ -> slotAt(idx_).val_;
       }
 
-      const Value* operator->() const
+      const Value* operator -> () const
       {
-        return &(table_->slotAt(idx_).val_);
+        return &(table_ -> slotAt(idx_).val_);
       }
 
       const Key& key() const noexcept
       {
-        return table_->slotAt(idx_).key_;
+        return table_ -> slotAt(idx_).key_;
       }
 
       const_iterator& operator++() noexcept
       {
-        if (table_ == nullptr || idx_ >= table_->capacity_)
+        if (table_ == nullptr || idx_ >= table_ -> capacity_)
         {
           return *this;
         }
 
         ++idx_;
-        while (idx_ < table_->capacity_ && table_->slotAt(idx_).state_ != State::OCCUPIED)
+        while (idx_ < table_ -> capacity_ && table_ -> slotAt(idx_).state_ != State::OCCUPIED)
         {
           ++idx_;
         }

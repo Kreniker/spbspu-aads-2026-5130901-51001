@@ -76,19 +76,19 @@ namespace kitserov
     {
       std::sort(items.begin(), items.end(), [](const Item* lhs, const Item* rhs)
       {
-        if (lhs->value() != rhs->value())
+        if (lhs -> value() != rhs -> value())
         {
-          return lhs->value() > rhs->value();
+          return lhs -> value() > rhs -> value();
         }
 
-        size_t lhsArea = lhs->width() * lhs->height();
-        size_t rhsArea = rhs->width() * rhs->height();
+        size_t lhsArea = lhs -> width() * lhs -> height();
+        size_t rhsArea = rhs -> width() * rhs -> height();
         if (lhsArea != rhsArea)
         {
           return lhsArea > rhsArea;
         }
 
-        return lhs->id() < rhs->id();
+        return lhs -> id() < rhs -> id();
       });
       return items;
     }
@@ -145,15 +145,15 @@ namespace kitserov
             Inventory next = current;
             place_item(next, *item, row, col, false);
             maximize_packing(items, index + 1, suffixValue, next,
-              currentValue + item->value(), best, seen);
+              currentValue + item -> value(), best, seen);
           }
 
-          if (item->width() != item->height() && can_place(current, *item, row, col, true))
+          if (item -> width() != item -> height() && can_place(current, *item, row, col, true))
           {
             Inventory next = current;
             place_item(next, *item, row, col, true);
             maximize_packing(items, index + 1, suffixValue, next,
-              currentValue + item->value(), best, seen);
+              currentValue + item -> value(), best, seen);
           }
         }
       }
@@ -169,7 +169,7 @@ namespace kitserov
         throw std::invalid_argument("collection " + collectionName + " have not defined");
       }
 
-      for (auto it = collection->begin(); it != collection->end(); ++it)
+      for (auto it = collection -> begin(); it != collection -> end(); ++it)
       {
         const Item* item = items.find(it.key());
         if (item == nullptr)
@@ -206,16 +206,16 @@ namespace kitserov
             counts.add(cell.id(), std::make_pair(&cell, size_t(1)));
             continue;
           }
-          ++entry->second;
+          ++entry -> second;
         }
       }
 
       Vector< const Item* > result;
       for (auto it = counts.begin(); it != counts.end(); ++it)
       {
-        const Item* item = it->first;
-        size_t area = item->width() * item->height();
-        size_t copies = area == 0 ? 0 : it->second / area;
+        const Item* item = it -> first;
+        size_t area = item -> width() * item -> height();
+        size_t copies = area == 0 ? 0 : it -> second / area;
         for (size_t index = 0; index < copies; ++index)
         {
           result.pushBack(item);
@@ -233,7 +233,7 @@ namespace kitserov
       Vector< size_t > suffixValue(items.size() + 1, 0);
       for (size_t index = items.size(); index > 0; --index)
       {
-        suffixValue[index - 1] = suffixValue[index] + items[index - 1]->value();
+        suffixValue[index - 1] = suffixValue[index] + items[index - 1] -> value();
       }
 
       PackingResult best;
@@ -334,12 +334,12 @@ namespace kitserov
       throw std::invalid_argument("Item with id " + itemId + " not defined.");
     }
 
-    if (x < 0 || static_cast< size_t >(x) >= inventory->cols())
+    if (x < 0 || static_cast< size_t >(x) >= inventory -> cols())
     {
       throw std::invalid_argument("x is out of range.");
     }
 
-    if (y < 0 || static_cast< size_t >(y) >= inventory->rows())
+    if (y < 0 || static_cast< size_t >(y) >= inventory -> rows())
     {
       throw std::invalid_argument("y is out of range.");
     }
@@ -432,9 +432,9 @@ namespace kitserov
     {
       throw std::invalid_argument("Item with id " + itemId + " not defined.");
     }
-    for (size_t rowIndex = 0; rowIndex < inventory->rows(); ++rowIndex)
+    for (size_t rowIndex = 0; rowIndex < inventory -> rows(); ++rowIndex)
     {
-      for (size_t colIndex = 0; colIndex < inventory->cols(); ++colIndex)
+      for (size_t colIndex = 0; colIndex < inventory -> cols(); ++colIndex)
       {
         if (inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, false)
           || inventory_detail::can_place(*inventory, *item, rowIndex, colIndex, true))

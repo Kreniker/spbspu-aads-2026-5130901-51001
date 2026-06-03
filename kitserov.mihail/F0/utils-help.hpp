@@ -49,14 +49,14 @@ namespace kitserov
 
     std::sort(sorted.begin(), sorted.end(), [](const Item* lhs, const Item* rhs)
     {
-      return lhs->id() < rhs->id();
+      return lhs -> id() < rhs -> id();
     });
 
     for (const Item* item : sorted)
     {
-      out << "Item [" << item->id() << "]: \"" << item->name() << "\" ("
-        << item->width() << " x " << item->height() << ", value = "
-        << item->value() << ")\n";
+      out << "Item [" << item -> id() << "]: \"" << item -> name() << "\" ("
+        << item -> width() << " x " << item -> height() << ", value = "
+        << item -> value() << ")\n";
     }
     if (sorted.size() == 0)
     {

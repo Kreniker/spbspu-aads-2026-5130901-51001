@@ -28,7 +28,7 @@ namespace kitserov
     if (existing != nullptr)
     {
       throw std::invalid_argument("You can't define an item with id '" + id
-        + "'. It is already defined by item '" + existing->name() + "'.");
+        + "'. It is already defined by item '" + existing -> name() + "'.");
     }
 
     Item item(id, name, value, width, height, items);
@@ -83,10 +83,10 @@ namespace kitserov
 
     (void) item;
 
-    size_t* existingAmount = collection->find(itemId);
+    size_t* existingAmount = collection -> find(itemId);
     if (existingAmount == nullptr)
     {
-      collection->add(itemId, static_cast< size_t >(amount));
+      collection -> add(itemId, static_cast< size_t >(amount));
     }
     else
     {
@@ -111,7 +111,7 @@ namespace kitserov
     }
 
     kitserov::Vector< std::pair< std::string, size_t > > sorted;
-    for (auto it = collection->begin(); it != collection->end(); ++it)
+    for (auto it = collection -> begin(); it != collection -> end(); ++it)
     {
       sorted.pushBack({it.key(), *it});
     }
@@ -130,8 +130,8 @@ namespace kitserov
       {
         continue;
       }
-      out << item->name() << ": " << entry.second
-        << " (value = " << entry.second * item->value() << ")\n";
+      out << item -> name() << ": " << entry.second
+        << " (value = " << entry.second * item -> value() << ")\n";
     }
   }
   inline void remove(std::ostream& out, std::istream& in, ItemTable& items,
@@ -147,7 +147,7 @@ namespace kitserov
     {
       throw std::invalid_argument("collection " + collectionName + " have not defined");
     }
-    size_t* existingAmount = collection->find(itemId);
+    size_t* existingAmount = collection -> find(itemId);
     if (existingAmount == nullptr)    {
       throw std::invalid_argument("collection " + collectionName + " have not item with id " + itemId);
     }
@@ -158,7 +158,7 @@ namespace kitserov
     *existingAmount -= amount;
     if (*existingAmount == 0)
     {
-      collection->erase(itemId);
+      collection -> erase(itemId);
     }
     out << "OK\n";
   }
