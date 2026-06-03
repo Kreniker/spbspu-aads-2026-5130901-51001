@@ -448,5 +448,22 @@ namespace kitserov
     }
     out << "NO\n";
   }
+  inline void organize(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    (void) items;
+    (void) collections;
+    std::string invName;
+    in >> invName;
+    Inventory* inventory = inventories.find(invName);
+    if (inventory == nullptr)
+    {
+      throw std::invalid_argument("Inventory " + invName + " have not defined");
+    }
+    Vector< const Item* > itemsFromInv = inventory_detail::expand_inventory_items(*inventory);
+    Inventory empty(inventory -> rows(), inventory -> cols());
+    *inventory = inventory_detail::pack_best(empty, std::move(itemsFromInv));
+    out << "OK\n";
+  }
 }
 #endif

@@ -39,6 +39,7 @@ int main()
   cmds.add("find_space", find_space);
   cmds.add("place-collection", place_collection);
   cmds.add("place_collection", place_collection);
+  cmds.add("organize", organize);
   cmds.add("clear", clear);
   cmds.add("help", help);
   cmds.add("save", save);
