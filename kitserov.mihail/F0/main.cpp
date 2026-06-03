@@ -22,11 +22,15 @@ int main()
   cmds.add("list_items", list_items);
   cmds.add("create-collection", create_collection);
   cmds.add("create_collection", create_collection);
+  cmds.add("list-collections", list_collections);
+  cmds.add("list_collections", list_collections);
   cmds.add("add", add);
   cmds.add("show-collection", show_collection);
   cmds.add("show_collection", show_collection);
   cmds.add("create-inv", create_inv);
   cmds.add("create_inv", create_inv);
+//  cmds.add("list-inv", list_inv);
+  //cmds.add("list_inv", list_inv);
   cmds.add("show-inv", show_inv);
   cmds.add("show_inv", show_inv);
   cmds.add("place", place);

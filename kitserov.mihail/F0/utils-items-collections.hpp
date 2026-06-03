@@ -36,32 +36,6 @@ namespace kitserov
     out << "OK\n";
   }
 
-  inline void list_items(std::ostream& out, std::istream& in, ItemTable& items,
-    CollectionTable& collections, InventoryTable& inventories)
-  {
-    (void) in;
-    (void) collections;
-    (void) inventories;
-
-    kitserov::Vector< const Item* > sorted;
-    for (auto it = items.begin(); it != items.end(); ++it)
-    {
-      sorted.pushBack(&(*it));
-    }
-
-    std::sort(sorted.begin(), sorted.end(), [](const Item* lhs, const Item* rhs)
-    {
-      return lhs->id() < rhs->id();
-    });
-
-    for (const Item* item : sorted)
-    {
-      out << "Item [" << item->id() << "]: \"" << item->name() << "\" ("
-        << item->width() << " x " << item->height() << ", value = "
-        << item->value() << ")\n";
-    }
-  }
-
   inline void create_collection(std::ostream& out, std::istream& in, ItemTable& items,
     CollectionTable& collections, InventoryTable& inventories)
   {
@@ -83,7 +57,6 @@ namespace kitserov
   inline void add(std::ostream& out, std::istream& in, ItemTable& items,
     CollectionTable& collections, InventoryTable& inventories)
   {
-    (void) out;
     (void) inventories;
 
     std::string collectionName;
