@@ -37,6 +37,7 @@ int main()
   cmds.add("place", place);
   cmds.add("place-collection", place_collection);
   cmds.add("place_collection", place_collection);
+  cmds.add("clear", clear);
   cmds.add("help", help);
   cmds.add("save", save);
   cmds.add("load", load);

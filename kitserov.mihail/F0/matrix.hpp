@@ -8,21 +8,13 @@
 
 namespace kitserov
 {
-  template< class T = int >
+  template< class T >
   class Vector
   {
   private:
     T* data_;
     size_t size_;
     size_t capacity_;
-
-    void release() noexcept
-    {
-      delete[] data_;
-      data_ = nullptr;
-      size_ = 0;
-      capacity_ = 0;
-    }
 
   public:
     Vector() noexcept :
@@ -89,6 +81,14 @@ namespace kitserov
 
       swap(other);
       return *this;
+    }
+
+    void release() noexcept
+    {
+      delete[] data_;
+      data_ = nullptr;
+      size_ = 0;
+      capacity_ = 0;
     }
 
     void swap(Vector& other) noexcept
@@ -214,7 +214,7 @@ namespace kitserov
     }
   };
 
-  template< class T = int >
+  template< class T >
   class Matrix
   {
     Vector< Vector< T > > data_;
@@ -285,6 +285,14 @@ namespace kitserov
         }
       }
       return out;
+    }
+    void clear()
+    {
+      for (size_t i = 0; i < cols_; ++i)
+      {
+        data_[i].release();
+      }
+      data_.release();
     }
   };
 }

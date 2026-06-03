@@ -386,5 +386,33 @@ namespace kitserov
       *inventory, collections, items, collectionName);
     out << "OK\n";
   }
+  inline void clear(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    (void) collections;
+    (void) items;
+    std::string invName;
+    in >> invName;
+    Inventory* inventory = inventories.find(invName);
+    if (inventory == nullptr)
+    {
+      throw std::invalid_argument("Inventory " + invName + " have not defined");
+    }
+    for (size_t i = 0; i < inventory -> cols(); ++i)
+    {
+      for (size_t j = 0; j < inventory -> rows(); ++j)
+      {
+        (*inventory)(j, i) = Item();
+      }
+    }
+    out << "Are you want delete this inventory?\n"
+      << "Press Y if yes and ANY another key if no\n";
+    std::string answer;
+    if (in >> answer && answer == "Y" || answer == "y") {
+      inventory -> clear();
+      inventories.erase(invName);
+    }
+    out << "OK\n";
+  }
 }
 #endif
