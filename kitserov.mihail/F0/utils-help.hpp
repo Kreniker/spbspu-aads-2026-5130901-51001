@@ -78,5 +78,22 @@ namespace kitserov
       out << "No one collection for now\n";
     }
   }
+  inline void list_inv(std::ostream& out, std::istream& in, ItemTable& items,
+    CollectionTable& collections, InventoryTable& inventories)
+  {
+    (void) in;
+    (void) items;
+    (void) collections;
+
+    for (auto it = inventories.begin(); it != inventories.end(); ++it)
+    {
+      out << "Inventory \"" << it.key() << "\" "
+        << (*it).cols() << " x " << (*it).rows() <<"\n";
+    }
+    if (inventories.begin() == inventories.end())
+    {
+      out << "No one inventory for now\n";
+    }
+  }
 }
 #endif

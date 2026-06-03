@@ -29,8 +29,8 @@ int main()
   cmds.add("show_collection", show_collection);
   cmds.add("create-inv", create_inv);
   cmds.add("create_inv", create_inv);
-//  cmds.add("list-inv", list_inv);
-  //cmds.add("list_inv", list_inv);
+  cmds.add("list-inv", list_inv);
+  cmds.add("list_inv", list_inv);
   cmds.add("show-inv", show_inv);
   cmds.add("show_inv", show_inv);
   cmds.add("place", place);
