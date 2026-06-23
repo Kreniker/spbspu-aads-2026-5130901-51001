@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(matrix_stream_output)
   std::ostringstream out;
   out << matrix;
 
-  BOOST_CHECK_EQUAL(out.str(), "1 1\n3 5");
+  BOOST_CHECK_EQUAL(out.str(), "[1] [1]\n[3] [5]");
 }
 
 BOOST_AUTO_TEST_CASE(matrix_throws_on_out_of_range_access)
